@@ -6,3 +6,4 @@ npm-debug.log
 
 # Composer
 vendor
+composer.lock
