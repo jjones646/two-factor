@@ -1,6 +1,12 @@
 <?php
+
+// If this file is called directly, abort.
+if ( ! defined( 'ABSPATH' ) ) {
+	die;
+}
+
 /**
- * Class for creating a Time Based One-Time Password provider.
+ * Class for creating a Time-based One-time Password provider.
  *
  * @package Two_Factor
  */
@@ -56,7 +62,7 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	 * Returns the name of the provider.
 	 */
 	public function get_label() {
-		return _x( 'Time Based One-Time Password (Google Authenticator)', 'Provider Label' );
+		return _x( 'Time-based One-time Password (Google Authenticator)', 'Provider Label' );
 	}
 
 	/**
@@ -73,7 +79,7 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 		$key = get_user_meta( $user->ID, self::SECRET_META_KEY, true );
 		$this->admin_notices();
 		?>
-		<br />
+		<br/>
 		<a href="javascript:;" onclick="jQuery('#two-factor-totp-options').toggle();"><?php esc_html_e( 'View Options &rarr;' ); ?></a>
 		<div id="two-factor-totp-options" style="display:none;">
 			<?php if ( empty( $key ) ) {

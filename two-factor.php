@@ -9,6 +9,11 @@
  * Network: True
  */
 
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * Shortcut constant to the path of this file.
  */
