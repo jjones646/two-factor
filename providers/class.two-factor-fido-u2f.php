@@ -1,4 +1,8 @@
 <?php
+// If this file is called directly, abort.
+if ( ! defined( 'ABSPATH' ) ) {
+	die;
+}
 /**
  * Class for creating a FIDO Universal 2nd Factor provider.
  *
@@ -56,20 +60,20 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 		$app_url_parts = parse_url( home_url() );
 		$app_url = sprintf( '%s://%s', $app_url_parts['scheme'], $app_url_parts['host'] );
 
-		require_once( TWO_FACTOR_DIR . 'includes/Yubico/U2F.php' );
+		require_once( TWO_FACTOR_DIR . 'vendor/autoload.php' );
 		self::$u2f = new u2flib_server\U2F( $app_url );
 
 		require_once( TWO_FACTOR_DIR . 'providers/class.two-factor-fido-u2f-admin.php' );
 		Two_Factor_FIDO_U2F_Admin::add_hooks( __CLASS__ );
 
-		add_action( 'login_enqueue_scripts', array( $this, 'login_enqueue_assets' ) );
+		add_action( 'login_enqueue_scripts',                array( $this, 'login_enqueue_assets' ) );
+		add_action( 'two-factor-user-options-' . __CLASS__, array( $this, 'user_options' ) );
 		return parent::__construct();
 	}
 
 	public function get_priority() {
 		return 2;
 	}
-
 	/**
 	 * Returns the name of the provider.
 	 *
@@ -117,7 +121,7 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 		<p><?php esc_html_e( 'Now insert (and tap) your Security Key.' ); ?></p>
 		<input type="hidden" name="u2f_response" id="u2f_response" />
 		<script>
-			var u2fL10n = <?php echo wp_json_encode( array(
+			u2fL10n = <?php echo wp_json_encode( array(
 				'request' => $data,
 			) ); ?>;
 		</script>
@@ -165,6 +169,44 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 	}
 
 	/**
+	 * Inserts markup at the end of the user profile field for this provider.
+	 *
+	 * @since 0.1-dev
+	 *
+	 * @param WP_User $user WP_User object of the logged-in user.
+	 */
+	public function user_options( $user ) {
+		?>
+		<div>
+			<?php echo esc_html( __( 'You need to register security keys such as Yubikey.' ) ); ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Check if a given variable is a security key
+	 *
+	 * @since 0.1-dev+
+	 *
+	 * @param object $key The data of registered security key.
+	 * @return bool True if valid security key object, false otherwise.
+	 */
+	public static function is_security_key( $key ) {
+		if (
+			! is_object( $key )
+				|| ! property_exists( $key, 'keyHandle' ) || empty( $key->keyHandle )
+				|| ! property_exists( $key, 'publicKey' ) || empty( $key->publicKey )
+				|| ! property_exists( $key, 'certificate' ) || empty( $key->certificate )
+				|| ! property_exists( $key, 'counter' ) || ( -1 > $key->counter )
+		) {
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
+
+	/**
 	 * Add registered security key to a user.
 	 *
 	 * @since 0.1-dev
@@ -178,13 +220,7 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 			return false;
 		}
 
-		if (
-			! is_object( $register )
-				|| ! property_exists( $register, 'keyHandle' ) || empty( $register->keyHandle )
-				|| ! property_exists( $register, 'publicKey' ) || empty( $register->publicKey )
-				|| ! property_exists( $register, 'certificate' ) || empty( $register->certificate )
-				|| ! property_exists( $register, 'counter' ) || ( -1 > $register->counter )
-		) {
+		if ( ! self::is_security_key( $register ) ) {
 			return false;
 		}
 
@@ -245,13 +281,7 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 			return false;
 		}
 
-		if (
-			! is_object( $data )
-				|| ! property_exists( $data, 'keyHandle' ) || empty( $data->keyHandle )
-				|| ! property_exists( $data, 'publicKey' ) || empty( $data->publicKey )
-				|| ! property_exists( $data, 'certificate' ) || empty( $data->certificate )
-				|| ! property_exists( $data, 'counter' ) || ( -1 > $data->counter )
-		) {
+		if ( ! self::is_security_key( $data ) ) {
 			return false;
 		}
 

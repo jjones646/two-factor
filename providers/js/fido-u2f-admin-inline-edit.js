@@ -1,9 +1,6 @@
 /* global inlineEditL10n, ajaxurl */
-var inlineEditKey;
-
 ( function( $ ) {
-	inlineEditKey = {
-
+	var inlineEditKey = {
 		init: function() {
 			var t = this,
 				row = $( '#security-keys-section #inline-edit' );
@@ -137,9 +134,6 @@ var inlineEditKey;
 			return id.replace( /\w+\-/, '' );
 		}
 	};
-
-	$( document ).ready( function() {
-		inlineEditKey.init();
-	} );
+	inlineEditKey.init();
 
 } )( jQuery );

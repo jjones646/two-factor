@@ -1,4 +1,10 @@
 <?php
+
+// If this file is called directly, abort.
+if ( ! defined( 'ABSPATH' ) ) {
+	die;
+}
+
 /**
  * Class for creating a backup codes provider.
  *
