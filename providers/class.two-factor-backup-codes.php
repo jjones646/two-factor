@@ -48,8 +48,9 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	 * @since 0.1-dev
 	 */
 	protected function __construct() {
-		add_action( 'two-factor-user-options-' . __CLASS__, array( $this, 'user_options' ) );
-		add_action( 'admin_notices', array( $this, 'admin_notices' ) );
+		add_action( 'admin_enqueue_scripts',       				array( $this, 'enqueue_assets' ) );
+		add_action( 'two-factor-user-options-' . __CLASS__, 	array( $this, 'user_options' ) );
+		add_action( 'admin_notices', 							array( $this, 'admin_notices' ) );
 		add_action( 'wp_ajax_two_factor_backup_codes_generate', array( $this, 'ajax_generate_json' ) );
 
 		return parent::__construct();
@@ -111,10 +112,28 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	 */
 	public function is_available_for_user( $user ) {
 		// Does this user have available codes?
-		if ( 0 < self::codes_remaining_for_user( $user ) ) {
+		if ( self::codes_remaining_for_user( $user ) ) {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Enqueue assets.
+	 *
+	 * @since 0.2-dev
+	 *
+	 * @access public
+	 * @static
+	 *
+	 * @param string $hook Current page.
+	 */
+	public static function enqueue_assets( $hook ) {
+		if ( ! in_array( $hook, array( 'user-edit.php', 'profile.php' ) ) ) {
+			return;
+		}
+
+		wp_enqueue_script( 'backup-codes-options', plugins_url( 'js/backup-codes-options.js', __FILE__ ), array( 'jquery' ), null, true );
 	}
 
 	/**
@@ -131,15 +150,14 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 		<p id="two-factor-backup-codes">
 		<?php if ( $count ) : ?>
 			<p><?php _e( sprintf( 'You have %u unused ', $count ) . _n( 'code', 'codes', $count ) . ' remaining.' ); ?></p>
+			<p><button type="button" class="button button-secondary two-factor-backup-codes two-factor-unregister hide-if-no-js"><?php esc_html_e( 'Disable' ); ?></button></p>
 		<?php else : ?>
-			<button type="button" class="button button-two-factor-backup-codes-generate button-secondary hide-if-no-js">
-				<?php esc_html_e( 'Generate Backup Codes' ); ?>
-			</button>
+			<p><button type="button" class="button button-secondary button-two-factor-backup-codes-generate two-factor-backup-codes two-factor-register hide-if-no-js"><?php esc_html_e( 'Generate Backup Codes' ); ?></button></p>
 		<?php endif; ?>
 		</p>
-		<div class="two-factor-backup-codes-wrapper" style="display:none;">
+		<div class="two-factor-backup-codes-wrapper hide-if-js">
 			<ol class="two-factor-backup-codes-unused-codes"></ol>
-			<p class="description"><?php esc_html_e( 'Write these down!  Once you navigate away from this page, you will not be able to view these codes again.' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Store these codes in a secure location. You will not be able to view these codes again.' ); ?></p>
 			<p>
 				<a class="button button-two-factor-backup-codes-download button-secondary hide-if-no-js" href="javascript:void(0);" id="two-factor-backup-codes-download-link" download="two-factor-backup-codes.txt"><?php esc_html_e( 'Download Codes' ); ?></a>
 			<p>
@@ -269,7 +287,7 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	public function authentication_page( $user ) {
 		require_once( ABSPATH .  '/wp-admin/includes/template.php' );
 		?>
-		<p><?php esc_html_e( 'Enter a backup verification code.' ); ?></p><br/>
+		<p><?php esc_html_e( 'Enter a single-use backup code.' ); ?></p><br/>
 		<p>
 			<label for="authcode"><?php esc_html_e( 'Verification Code:' ); ?></label>
 			<input type="tel" name="two-factor-backup-code" id="authcode" class="input" value="" size="20" pattern="[0-9]*" />
@@ -335,5 +353,24 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 
 		// Update the backup code master list.
 		update_user_meta( $user->ID, self::BACKUP_CODES_META_KEY, $backup_codes );
+	}
+
+	/**
+	 * Removes all backup codes for a user.
+	 *
+	 * @since 0.2-dev
+	 *
+	 * @param WP_User $user WP_User object of the logged-in user.
+	 */
+	public function delete_all_codes( $user ) {
+		// $backup_codes = get_user_meta( $user->ID, self::BACKUP_CODES_META_KEY, true );
+		// Update the backup code master list.
+		update_user_meta( $user->ID, self::BACKUP_CODES_META_KEY, array() );
+
+		// if ( is_array( $backup_codes ) && ! empty( $backup_codes ) ) {
+		// 	foreach ( $backup_codes as $code_index => $code_hashed ) {
+		// 			$this->delete_code( $user, $code_hashed );
+		// 	}
+		// }
 	}
 }
