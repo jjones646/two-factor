@@ -47,5 +47,10 @@
 		}
 		$(this).addClass('clicked');
 
+		$(this).prop('disabled', true);
+		$('div.security-keys > .wp-list-table.widefat').slideDown(250, function() {
+
+		}
+
 	});
 })(jQuery);

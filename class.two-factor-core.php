@@ -618,7 +618,7 @@ class Two_Factor_Core {
 		wp_nonce_field( 'user_two_factor_options', '_nonce_user_two_factor_options', false );
 
 		?>
-		<table class="wp-list-table widefat striped">
+		<table class="wp-list-table widefat striped two-factor-table">
 			<thead>
 				<tr>
 					<td class="manage-column"><label class="screen-reader-text"><?php _e( 'Enabled' ); ?></label></td>
