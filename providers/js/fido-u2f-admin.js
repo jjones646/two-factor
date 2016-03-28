@@ -1,29 +1,47 @@
 /* global u2f, u2fL10n */
-( function( $ ) {
-	$( 'button#register_security_key' ).click( function() {
-		if ( $(this).hasClass( 'clicked' ) ) {
+(function($) {
+	$('button.two-factor-fido-u2f.two-factor-register').click(function() {
+		if ($(this).hasClass('clicked')) {
 			return false;
 		}
-		$(this).addClass( 'clicked' );
+		$(this).addClass('clicked');
 
-		setTimeout( $.proxy( function() {
-			var btnTxt = $(this).text();
-			$(this).text( u2fL10n.text.insert ).append( '<span class="spinner is-active" />' );
-			$( 'span.spinner.is-active', $(this) ).css( 'margin', '2.5px 0px 0px 5px' );
+		var _this = $(this);
+		var btnTxt = $(this).text();
 
-			u2f.register( [ u2fL10n.register.request ], u2fL10n.register.sigs, function( data ) {
-				if ( data.errorCode ) {
-					alert( 'Registration failed.' , data.errorCode );
-					$(this).text( btnTxt );
+		$(this).text(u2fL10n.text.insert).append('<span class="spinner is-active" />');
+		$('span.spinner.is-active', $(this)).css('margin', '2.5px 0px 0px 5px');
+
+		setTimeout($.proxy(function() {
+			u2f.register([u2fL10n.register.request], u2fL10n.register.sigs, function(data) {
+				if (data.errorCode) {
+					_this.text(btnTxt);
+					_this.removeClass('clicked');
+					alert('Registration failed.', data.errorCode);
 
 					return false;
 				}
 
-				$( '#do_new_security_key' ).val( 'true' );
-				$( '#u2f_response' ).val( JSON.stringify( data ) );
+				$('#do_new_security_key').val('true');
+				$('#u2f_response').val(JSON.stringify(data));
 				// See: http://stackoverflow.com/questions/833032/submit-is-not-a-function-error-in-javascript
-				$( '<form>' )[0].submit.call( $( '#your-profile' )[0] );
+				$('<form>')[0].submit.call($('#your-profile')[0]);
 			});
 		}, $(this)), 1000);
 	});
-})( jQuery );
+
+	$('button.two-factor-toggle').click(function() {
+		$(this).prop('disabled', true);
+		$('td > .two-factor-toggle').slideUp(125, function() {
+			$('td > div.two-factor-toggle').slideDown();
+		});
+	});
+
+	$('button.two-factor-fido-u2f two-factor-toggle').click(function() {
+		if ($(this).hasClass('clicked')) {
+			return false;
+		}
+		$(this).addClass('clicked');
+
+	});
+})(jQuery);
