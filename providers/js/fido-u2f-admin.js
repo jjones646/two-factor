@@ -34,14 +34,14 @@
 		}, $(this)), 1000);
 	});
 
-	$('button.two-factor-toggle').click(function() {
+	$('button.two-factor-toggle.two-factor').has('').click(function() {
 		$(this).prop('disabled', true);
 		$('td > .two-factor-toggle').slideUp(125, function() {
 			$('td > div.two-factor-toggle').slideDown();
 		});
 	});
 
-	$('button.two-factor-fido-u2f.two-factor-toggle').click(function() {
+	$('button.two-factor-toggle.two-factor-fido-u2f').click(function() {
 		if ($(this).hasClass('clicked')) {
 			return false;
 		}
