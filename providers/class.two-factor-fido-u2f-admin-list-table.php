@@ -41,11 +41,7 @@ class Two_Factor_FIDO_U2F_Admin_List_Table extends WP_List_Table {
 	 * @since 0.1-dev
 	 */
 	public function prepare_items() {
-		$columns  = $this->get_columns();
-		$hidden   = array();
-		$sortable = array();
-		$primary  = 'name';
-		$this->_column_headers = array( $columns, $hidden, $sortable, $primary );
+		$this->_column_headers = array( $this->get_columns(), array(), array(), 'name' );
 	}
 
 	/**
@@ -119,7 +115,6 @@ class Two_Factor_FIDO_U2F_Admin_List_Table extends WP_List_Table {
 						<fieldset>
 							<div class="inline-edit-col">
 								<h4><?php esc_html_e( 'Quick Edit' ); ?></h4>
-
 								<label>
 									<span class="title"><?php esc_html_e( 'Name' ); ?></span>
 									<span class="input-text-wrap"><input type="text" name="name" class="ptitle" value="" /></span>

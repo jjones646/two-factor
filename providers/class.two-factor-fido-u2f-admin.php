@@ -154,8 +154,11 @@ class Two_Factor_FIDO_U2F_Admin {
 				$u2f_list_table = new Two_Factor_FIDO_U2F_Admin_List_Table();
 				$u2f_list_table->items = $security_keys;
 				$u2f_list_table->prepare_items();
+
+				?><div class="two-factor-fido-u2f two-factor-toggle hide-if-js"><?php
 				$u2f_list_table->display();
 				$u2f_list_table->inline_edit();
+				?></div><?php
 			}
 			?>
 		</div>

@@ -45,12 +45,8 @@
 		if ($(this).hasClass('clicked')) {
 			return false;
 		}
-		$(this).addClass('clicked');
-
-		$(this).prop('disabled', true);
-		$('div.security-keys > .wp-list-table.widefat').slideDown(250, function() {
-
-		});
-
+		
+		$(this).addClass('clicked').prop('disabled', true);
+		$('div.two-factor-toggle.two-factor-fido-u2f > table.wp-list-table').slideDown();
 	});
 })(jQuery);
