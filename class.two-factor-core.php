@@ -638,13 +638,13 @@ class Two_Factor_Core {
 					<th scope="row" class="check-column">
 					<input type="checkbox" id="method-<?php echo esc_attr( $class ); ?>" name="<?php echo esc_attr( self::ENABLED_PROVIDERS_USER_META_KEY ); ?>[]" value="<?php echo esc_attr( $class ); ?>" <?php checked( in_array( $class, $enabled_providers ) ); ?>>
 					</th>
-					<td data-colname="Method" class="column-slug alignleft">
+					<td data-colname="Method" class="column-slug">
 						<label for="method-<?php echo esc_attr( $class ); ?>"><?php $object->print_label(); ?></a>
 					</td>
 					<td data-colname="Details" class="alignleft">
 						<?php do_action( 'two-factor-user-options-' . $class, $user ); ?>
 					</td>
-					<td data-colname="Options" class="alignleft">
+					<td data-colname="Options" class="">
 						
 					</td>
 				</tr>

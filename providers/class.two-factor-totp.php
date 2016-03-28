@@ -39,10 +39,31 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	 * Class constructor. Sets up hooks, etc.
 	 */
 	protected function __construct() {
+		add_action( 'admin_enqueue_scripts',       			array( __CLASS__, 'enqueue_assets' ) );
 		add_action( 'two-factor-user-options-' . __CLASS__, array( $this, 'user_two_factor_options' ) );
 		add_action( 'personal_options_update',              array( $this, 'user_two_factor_options_update' ) );
 		add_action( 'edit_user_profile_update',             array( $this, 'user_two_factor_options_update' ) );
+
+		
 		return parent::__construct();
+	}
+
+	/**
+	 * Enqueue assets.
+	 *
+	 * @since 0.2-dev
+	 *
+	 * @access public
+	 * @static
+	 *
+	 * @param string $hook Current page.
+	 */
+	public static function enqueue_assets( $hook ) {
+		if ( ! in_array( $hook, array( 'user-edit.php', 'profile.php' ) ) ) {
+			return;
+		}
+
+		wp_enqueue_script( 'totp-options', plugins_url( 'js/totp-options.js', __FILE__ ), array( 'jquery' ), null, true );
 	}
 
 	/**
@@ -85,26 +106,24 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 			$key = $this->generate_key();
 			$site_name = get_bloginfo( 'name', 'display' );
 			?>
-			<a href="javascript:;" onclick="jQuery('#two-factor-totp-options').toggle();"><?php esc_html_e( 'View Options &rarr;' ); ?></a>
-			<div id="two-factor-totp-options" style="display:none;">
-			<img src="<?php echo esc_url( $this->get_google_qr_code( $site_name . ':' . $user->user_login, $key, $site_name ) ); ?>" id="two-factor-totp-qrcode" />
-			<p><strong><?php echo esc_html( $key ); ?></strong></p>
-			<p><?php esc_html_e( 'Please scan the QR code or use the provided key. Optionally, you can give an authentication code from your app.' ); ?></p>
-			<p>
-				<label for="two-factor-totp-authcode"><?php esc_html_e( 'Authentication Code:' ); ?></label>
-				<input type="hidden" name="two-factor-totp-key" value="<?php echo esc_attr( $key ) ?>" />
-				<input type="tel" name="two-factor-totp-authcode" id="two-factor-totp-authcode" class="input" value="" size="20" pattern="[0-9]*" />
-			</p>
+			<p><button type="button" class="button button-secondary two-factor-totp two-factor-register"><?php esc_html_e( 'Setup Authenticator App' ); ?></button></p>
+			<div id="two-factor-totp-options" class="two-factor-toggle two-factor-totp hide-if-js">
+				<img src="<?php echo esc_url( $this->get_google_qr_code( $site_name . ':' . $user->user_login, $key, $site_name ) ); ?>" id="two-factor-totp-qrcode" />
+				<p><strong><?php echo esc_html( $key ); ?></strong></p>
+				<p><?php esc_html_e( 'Please scan the QR code or use the provided key. Optionally, you can give an authentication code from your app.' ); ?></p>
+				<p>
+					<label for="two-factor-totp-authcode"><?php esc_html_e( 'Authentication Code:' ); ?></label>
+					<input type="hidden" name="two-factor-totp-key" value="<?php echo esc_attr( $key ) ?>" />
+					<input type="tel" name="two-factor-totp-authcode" id="two-factor-totp-authcode" class="input" value="" size="20" pattern="[0-9]*" />
+				</p>
+			</div>
 			<?php
 		} else {
 			?>
 			<p class="success"><?php esc_html_e( 'Enabled' ); ?></p>
+			<p><button type="button" class="button button-secondary two-factor-totp two-factor-unregister"><?php esc_html_e( 'Disable' ); ?></button></p>
 			<?php
 		}
-
-		?>
-		</div>
-		<?php
 	}
 
 	/**

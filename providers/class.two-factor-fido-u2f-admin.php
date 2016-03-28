@@ -128,22 +128,28 @@ class Two_Factor_FIDO_U2F_Admin {
 		?>
 		<div class="security-keys" id="security-keys-section">
 			<div class="register-security-key">
-				<?php if ( Two_Factor_FIDO_U2F::is_browser_support() ) : // @todo do this in JS instead ?>
-				<input type="hidden" name="do_new_security_key" id="do_new_security_key" />
-				<input type="hidden" name="u2f_response" id="u2f_response" />
-				<?php if ( empty( $security_keys ) ) : ?>
-				<p><button type="button" class="button button-secondary two-factor-fido-u2f two-factor-register "><?php esc_html_e( 'Add Key' ); ?></button></p>
+				<?php if ( ! is_ssl() ) : ?>
+					<p class="description"><?php esc_html_e( 'Security Keys require an https connection.' ); ?></p>
+					<p><button type="button" class="button button-secondary two-factor-fido-u2f two-factor-toggle "><?php esc_html_e( 'View Keys' ); ?></button></p>
 				<?php else : ?>
-				<p><button type="button" class="button button-secondary two-factor-fido-u2f two-factor-toggle"><?php esc_html_e( 'Manage Keys' ); ?></button></p>
-				<?php endif; ?>
+					<?php if ( Two_Factor_FIDO_U2F::is_browser_support() ) : ?>
+					<input type="hidden" name="do_new_security_key" id="do_new_security_key" />
+					<input type="hidden" name="u2f_response" id="u2f_response" />
+					<p>
+					<?php if ( empty( $security_keys ) ) : ?>
+					<p><button type="button" class="button button-secondary two-factor-fido-u2f two-factor-register "><?php esc_html_e( 'Add Key' ); ?></button></p>
+					<?php else : ?>
+					<p><button type="button" class="button button-secondary two-factor-fido-u2f two-factor-toggle"><?php esc_html_e( 'Manage Keys' ); ?></button></p>
+					<?php endif; ?>
 
-				<?php else : ?>
-				<p class="description"><?php esc_html_e( 'You are using an unsupported browser. Security Keys are only supported in Chrome 41+. ' ); ?><a href="https://support.google.com/accounts/answer/6103523"><?php _e( 'More Information' ); ?></a></p>
+					<?php else : ?>
+					<p class="description"><?php esc_html_e( 'You are using an unsupported browser. Security Keys are only supported in Chrome 41+. ' ); ?><a href="https://support.google.com/accounts/answer/6103523"><?php _e( 'More Information' ); ?></a></p>
 
+					<?php endif; ?>
 				<?php endif; ?>
 			</div>
 
-			<?php if ( $new_key ) : // @todo toggle this in JS instead ?>
+			<?php if ( $new_key ) : ?>
 			<p class="new-security-key"><?php esc_html_e( 'Security Key successfully registered.' ); ?></p>
 			<?php endif; ?>
 			<div class="two-factor-fido-u2f two-factor-toggle hide-if-js">
