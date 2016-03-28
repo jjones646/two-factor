@@ -36,20 +36,6 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 	const AUTH_DATA_USER_META_KEY = '_two_factor_fido_u2f_login_request';
 
 	/**
-	 * Ensures only one instance of this class exists in memory at any one time.
-	 *
-	 * @since 0.1-dev
-	 */
-	static function get_instance() {
-		static $instance;
-		$class = __CLASS__;
-		if ( ! is_a( $instance, $class ) ) {
-			$instance = new $class;
-		}
-		return $instance;
-	}
-
-	/**
 	 * Class constructor.
 	 *
 	 * @since 0.1-dev
@@ -73,16 +59,18 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 		return parent::__construct();
 	}
 
-	public function get_priority() {
-		return 2;
-	}
 	/**
-	 * Returns the name of the provider.
+	 * Ensures only one instance of this class exists in memory at any one time.
 	 *
 	 * @since 0.1-dev
 	 */
-	public function get_label() {
-		return _x( 'Security Keys', 'Provider Label' );
+	static function get_instance() {
+		static $instance;
+		$class = __CLASS__;
+		if ( ! is_a( $instance, $class ) ) {
+			$instance = new $class;
+		}
+		return $instance;
 	}
 
 	/**
@@ -97,6 +85,24 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 
 		wp_enqueue_script( 'u2f-api',        plugins_url( 'includes/Google/u2f-api.js', dirname( __FILE__ ) ), null, null, true );
 		wp_enqueue_script( 'fido-u2f-login', plugins_url( 'js/fido-u2f-login.js', __FILE__ ), array( 'jquery', 'u2f-api' ), null, true );
+	}
+
+	/**
+	 * Returns the priority of the provider type.
+	 *
+	 * @since 0.2-dev
+	 */
+	public function get_priority() {
+		return 2;
+	}
+
+	/**
+	 * Returns the name of the provider.
+	 *
+	 * @since 0.1-dev
+	 */
+	public function get_label() {
+		return _x( 'Security Keys', 'Provider Label' );
 	}
 
 	/**

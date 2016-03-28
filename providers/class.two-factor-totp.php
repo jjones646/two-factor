@@ -48,12 +48,20 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	}
 
 	/**
+	 * Ensures only one instance of this class exists in memory at any one time.
+	 */
+	public static function get_instance() {
+		static $instance;
+		if ( ! isset( $instance ) ) {
+			$instance = new self();
+		}
+		return $instance;
+	}
+
+	/**
 	 * Enqueue assets.
 	 *
 	 * @since 0.2-dev
-	 *
-	 * @access public
-	 * @static
 	 *
 	 * @param string $hook Current page.
 	 */
@@ -66,16 +74,10 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	}
 
 	/**
-	 * Ensures only one instance of this class exists in memory at any one time.
+	 * Returns the priority of the provider type.
+	 *
+	 * @since 0.2-dev
 	 */
-	public static function get_instance() {
-		static $instance;
-		if ( ! isset( $instance ) ) {
-			$instance = new self();
-		}
-		return $instance;
-	}
-
 	public function get_priority() {
 		return 4;
 	}

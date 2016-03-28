@@ -22,6 +22,17 @@ class Two_Factor_Email extends Two_Factor_Provider {
 	const TOKEN_META_KEY = '_two_factor_email_token';
 
 	/**
+	 * Class constructor.
+	 *
+	 * @since 0.1-dev
+	 */
+	protected function __construct() {
+		add_action( 'admin_enqueue_scripts',       			array( $this, 'enqueue_assets' ) );
+		add_action( 'two-factor-user-options-' . __CLASS__, array( $this, 'user_options' ) );
+		return parent::__construct();
+	}
+
+	/**
 	 * Ensures only one instance of this class exists in memory at any one time.
 	 *
 	 * @since 0.1-dev
@@ -36,15 +47,25 @@ class Two_Factor_Email extends Two_Factor_Provider {
 	}
 
 	/**
-	 * Class constructor.
+	 * Enqueue assets.
 	 *
-	 * @since 0.1-dev
+	 * @since 0.2-dev
+	 *
+	 * @param string $hook Current page.
 	 */
-	protected function __construct() {
-		add_action( 'two-factor-user-options-' . __CLASS__, array( $this, 'user_options' ) );
-		return parent::__construct();
+	public static function enqueue_assets( $hook ) {
+		if ( ! in_array( $hook, array( 'user-edit.php', 'profile.php' ) ) ) {
+			return;
+		}
+
+		wp_enqueue_script( 'totp-options', plugins_url( 'js/totp-options.js', __FILE__ ), array( 'jquery' ), null, true );
 	}
 
+	/**
+	 * Returns the priority of the provider type.
+	 *
+	 * @since 0.2-dev
+	 */
 	public function get_priority() {
 		return 6;
 	}

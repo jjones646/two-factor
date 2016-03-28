@@ -23,8 +23,13 @@ abstract class Two_Factor_Provider {
 		return $this;
 	}
 
+	/**
+	 * Returns the priority of the provider type.
+	 *
+	 * @since 0.2-dev
+	 */
 	public function get_priority() {
-		return 10;
+		return 100;
 	}
 
 	/**

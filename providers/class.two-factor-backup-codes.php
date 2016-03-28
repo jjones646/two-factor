@@ -29,6 +29,20 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	const NUMBER_OF_CODES = 10;
 
 	/**
+	 * Class constructor.
+	 *
+	 * @since 0.1-dev
+	 */
+	protected function __construct() {
+		add_action( 'admin_enqueue_scripts',       				array( $this, 'enqueue_assets' ) );
+		add_action( 'two-factor-user-options-' . __CLASS__, 	array( $this, 'user_options' ) );
+		add_action( 'admin_notices', 							array( $this, 'admin_notices' ) );
+		add_action( 'wp_ajax_two_factor_backup_codes_generate', array( $this, 'ajax_generate_json' ) );
+
+		return parent::__construct();
+	}
+
+	/**
 	 * Ensures only one instance of this class exists in memory at any one time.
 	 *
 	 * @since 0.1-dev
@@ -43,19 +57,25 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	}
 
 	/**
-	 * Class constructor.
+	 * Enqueue assets.
 	 *
-	 * @since 0.1-dev
+	 * @since 0.2-dev
+	 *
+	 * @param string $hook Current page.
 	 */
-	protected function __construct() {
-		add_action( 'admin_enqueue_scripts',       				array( $this, 'enqueue_assets' ) );
-		add_action( 'two-factor-user-options-' . __CLASS__, 	array( $this, 'user_options' ) );
-		add_action( 'admin_notices', 							array( $this, 'admin_notices' ) );
-		add_action( 'wp_ajax_two_factor_backup_codes_generate', array( $this, 'ajax_generate_json' ) );
+	public static function enqueue_assets( $hook ) {
+		if ( ! in_array( $hook, array( 'user-edit.php', 'profile.php' ) ) ) {
+			return;
+		}
 
-		return parent::__construct();
+		wp_enqueue_script( 'backup-codes-options', plugins_url( 'js/backup-codes-options.js', __FILE__ ), array( 'jquery' ), null, true );
 	}
 
+	/**
+	 * Returns the priority of the provider type.
+	 *
+	 * @since 0.2-dev
+	 */
 	public function get_priority() {
 		return 8;
 	}
@@ -116,24 +136,6 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 			return true;
 		}
 		return false;
-	}
-
-	/**
-	 * Enqueue assets.
-	 *
-	 * @since 0.2-dev
-	 *
-	 * @access public
-	 * @static
-	 *
-	 * @param string $hook Current page.
-	 */
-	public static function enqueue_assets( $hook ) {
-		if ( ! in_array( $hook, array( 'user-edit.php', 'profile.php' ) ) ) {
-			return;
-		}
-
-		wp_enqueue_script( 'backup-codes-options', plugins_url( 'js/backup-codes-options.js', __FILE__ ), array( 'jquery' ), null, true );
 	}
 
 	/**
