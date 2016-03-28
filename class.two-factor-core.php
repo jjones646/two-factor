@@ -612,7 +612,7 @@ class Two_Factor_Core {
 		} else {
 			?><div class="two-factor two-factor-toggle"><?php
 
-		}
+		} 
 
 		$primary_provider = get_user_meta( $user->ID, self::PROVIDER_USER_META_KEY, true );
 		wp_nonce_field( 'user_two_factor_options', '_nonce_user_two_factor_options', false );
@@ -622,9 +622,9 @@ class Two_Factor_Core {
 			<thead>
 				<tr>
 					<td class="manage-column"><label class="screen-reader-text"><?php _e( 'Enabled' ); ?></label></td>
-					<th scope="col" class="manage-column"><?php _e( 'Method' ); ?></th>
-					<th scope="col" class="manage-column"><?php _e( 'Configurations' ); ?></th>
-					<th scope="col" class="manage-column"><?php _e( 'Options' ); ?></th>
+					<th scope="col" class="manage-column alignleft"><?php _e( 'Method' ); ?></th>
+					<th scope="col" class="manage-column alignleft"><?php _e( 'Configurations' ); ?></th>
+					<th scope="col" class="manage-column alignleft"><?php _e( 'Options' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
