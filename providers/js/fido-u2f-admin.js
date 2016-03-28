@@ -45,6 +45,6 @@
 		console.log($(this));
 		$(this).toggleClass('clicked');
 		$(this).prop('disabled', !$(this).prop('disabled'));
-		$('div.two-factor-toggle.two-factor-fido-u2f > .wp-list-table').slideDown();
+		$('div.two-factor-toggle.two-factor-fido-u2f > table').slideDown();
 	});
 })(jQuery);
