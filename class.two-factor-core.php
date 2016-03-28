@@ -641,7 +641,7 @@ class Two_Factor_Core {
 						<?php do_action( 'two-factor-user-options-' . $class, $user ); ?>
 					</td>
 					<td data-colname="Options">
-						<!-- <?php do_action( 'two-factor-user-options-' . $class, $user ); ?> -->
+						
 					</td>
 				</tr>
 			<?php endforeach; ?>
