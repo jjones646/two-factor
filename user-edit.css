@@ -1,5 +1,5 @@
 
-.two-factor-methods-table {
+/*.two-factor-methods-table {
 	background-color: #fff;
 	border: 1px solid #e5e5e5;
 	border-spacing: 0;
@@ -41,6 +41,22 @@
 }
 .two-factor-methods-table tr .method-enable input {
 	margin:4px;
+}*/
+
+.two-factor-wrap {
+
+}
+
+.two-factor {
+
+}
+
+.two-factor-wrap .wp-list-table {
+	width: 70%;
+}
+
+#two-factor-profile-option {
+
 }
 
 .application-passwords tfoot {
@@ -57,6 +73,6 @@
 	margin: 1em 0;
 }
 
-.two-factor-verification .two-factor-introduction {
+/*.two-factor-verification .two-factor-introduction {
 	margin-bottom:1em;
-}
+}*/

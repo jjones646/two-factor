@@ -46,7 +46,7 @@ class Two_Factor_Email extends Two_Factor_Provider {
 	}
 
 	public function get_priority() {
-		return 8;
+		return 6;
 	}
 
 	/**
@@ -189,7 +189,7 @@ class Two_Factor_Email extends Two_Factor_Provider {
 		$email = $user->user_email;
 		?>
 		<p>
-			<?php echo esc_html( sprintf( __( 'Authentication codes will be sent to %1$s.' ), $email ) ); ?>
+			<?php esc_html( sprintf( __( 'Authentication codes will be sent to %1$s.' ), $email ) ); ?>
 		</p>
 		<?php
 	}

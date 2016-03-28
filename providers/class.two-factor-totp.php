@@ -80,25 +80,29 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 		wp_nonce_field( 'user_two_factor_totp_options', '_nonce_user_two_factor_totp_options', false );
 		$key = get_user_meta( $user->ID, self::SECRET_META_KEY, true );
 		$this->admin_notices();
+
+		if ( empty( $key ) ) {
+			$key = $this->generate_key();
+			$site_name = get_bloginfo( 'name', 'display' );
+			?>
+			<a href="javascript:;" onclick="jQuery('#two-factor-totp-options').toggle();"><?php esc_html_e( 'View Options &rarr;' ); ?></a>
+			<div id="two-factor-totp-options" style="display:none;">
+			<img src="<?php echo esc_url( $this->get_google_qr_code( $site_name . ':' . $user->user_login, $key, $site_name ) ); ?>" id="two-factor-totp-qrcode" />
+			<p><strong><?php echo esc_html( $key ); ?></strong></p>
+			<p><?php esc_html_e( 'Please scan the QR code or use the provided key. Optionally, you can give an authentication code from your app.' ); ?></p>
+			<p>
+				<label for="two-factor-totp-authcode"><?php esc_html_e( 'Authentication Code:' ); ?></label>
+				<input type="hidden" name="two-factor-totp-key" value="<?php echo esc_attr( $key ) ?>" />
+				<input type="tel" name="two-factor-totp-authcode" id="two-factor-totp-authcode" class="input" value="" size="20" pattern="[0-9]*" />
+			</p>
+			<?php
+		} else {
+			?>
+			<p class="success"><?php esc_html_e( 'Enabled' ); ?></p>
+			<?php
+		}
+
 		?>
-		<br/>
-		<a href="javascript:;" onclick="jQuery('#two-factor-totp-options').toggle();"><?php esc_html_e( 'View Options &rarr;' ); ?></a>
-		<div id="two-factor-totp-options" style="display:none;">
-			<?php if ( empty( $key ) ) {
-				$key = $this->generate_key();
-				$site_name = get_bloginfo( 'name', 'display' );
-				?>
-				<img src="<?php echo esc_url( $this->get_google_qr_code( $site_name . ':' . $user->user_login, $key, $site_name ) ); ?>" id="two-factor-totp-qrcode" />
-				<p><strong><?php echo esc_html( $key ); ?></strong></p>
-				<p><?php esc_html_e( 'Please scan the QR code or manually enter the key, then enter an authentication code from your app in order to complete setup' ); ?></p>
-				<p>
-					<label for="two-factor-totp-authcode"><?php esc_html_e( 'Authentication Code:' ); ?></label>
-					<input type="hidden" name="two-factor-totp-key" value="<?php echo esc_attr( $key ) ?>" />
-					<input type="tel" name="two-factor-totp-authcode" id="two-factor-totp-authcode" class="input" value="" size="20" pattern="[0-9]*" />
-				</p>
-			<?php } else { ?>
-				<p class="success"><?php esc_html_e( 'Enabled' ); ?></p>
-			<?php } ?>
 		</div>
 		<?php
 	}
@@ -120,15 +124,13 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 
 			$notices = array();
 
-			if ( empty( $_POST['two-factor-totp-authcode'] ) ) {
-				$notices['error'][] = __( 'Two Factor Authentication not activated, you must specify authcode to ensure it is properly set up. Please re-scan the QR code and enter the code provided by your application.' );
-			} else {
+			if ( ! empty( $_POST['two-factor-totp-authcode'] ) ) {
 				if ( $this->is_valid_authcode( $_POST['two-factor-totp-key'], $_POST['two-factor-totp-authcode'] ) ) {
 					if ( ! update_user_meta( $user_id, self::SECRET_META_KEY, $_POST['two-factor-totp-key'] ) ) {
-						$notices['error'][] = __( 'Unable to save Two Factor Authentication code. Please re-scan the QR code and enter the code provided by your application.' );
+						$notices['error'][] = __( '2-Step, unable to save Verification Code. Please re-scan the QR code or enter the code provided by your application.' );
 					}
 				} else {
-					$notices['error'][] = __( 'Two Factor Authentication not activated, the authentication code you entered was not valid. Please re-scan the QR code and enter the code provided by your application.' );
+					$notices['error'][] = __( '2-Step, Verification Codes not activated. The authentication code you entered is invalid. Please re-scan the QR code or enter the code provided by your application.' );
 				}
 			}
 

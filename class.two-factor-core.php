@@ -67,7 +67,6 @@ class Two_Factor_Core {
 			'Two_Factor_Totp'         => TWO_FACTOR_DIR . 'providers/class.two-factor-totp.php',
 			'Two_Factor_FIDO_U2F'     => TWO_FACTOR_DIR . 'providers/class.two-factor-fido-u2f.php',
 			'Two_Factor_Backup_Codes' => TWO_FACTOR_DIR . 'providers/class.two-factor-backup-codes.php',
-			'Two_Factor_Dummy'        => TWO_FACTOR_DIR . 'providers/class.two-factor-dummy.php',
 		);
 
 		// FIDO U2F is PHP 5.3+ only.
@@ -524,7 +523,7 @@ class Two_Factor_Core {
 			if ( $customize_login ) {
 				wp_enqueue_script( 'customize-base' );
 			}
-			$message = '<p class="message">' . __( 'You have logged in successfully.' ) . '</p>';
+			$message = '<p class="message">' . __( 'You have successfully logged in.' ) . '</p>';
 			$interim_login = 'success'; // WPCS: override ok.
 			login_header( '', $message ); ?>
 			</div>
@@ -590,52 +589,77 @@ class Two_Factor_Core {
 	public static function user_two_factor_options( $user ) {
 		wp_enqueue_style( 'user-edit-2fa', plugins_url( 'user-edit.css', __FILE__ ) );
 		$enabled_providers = get_user_meta( $user->ID, self::ENABLED_PROVIDERS_USER_META_KEY, true );
-		if ( empty( $enabled_providers ) ) {
-			// Because get_user_meta() has no way of providing a default value.
+
+		// if ( IS_PROFILE_PAGE )
+		?>
+		<h2><?php _e( 'Sign-in Methods' ); ?></h2>
+		<table class="form-table">
+		<tr id="two-factor-profile-option" class="two-factor two-factor-wrap">
+			<th scope="row"><?php _e( '2-Step Verification' ); ?></th>
+			<td>
+		<?php
+
+		$two_factor_disabled = empty( $enabled_providers );
+		if ( $two_factor_disabled ) {
+			// Because get_user_meta() has no way of providing a def
 			$enabled_providers = array();
+
+			?>
+			<input class="hidden" value=" "><!-- #24364 workaround -->
+			<button type="button" class="button button-secondary two-factor-toggle hide-if-no-js"><?php _e( 'Enable 2-Step Verification' ); ?></button>
+			<p class="description two-factor-toggle"><?php _e('Add a second layer of protection with 2-Step Verification, which requires a single-use code when you sign in.'); ?></p>
+			<div class="two-factor-toggle hide-if-js">
+			<?php
+		} else {
+			?><div class="two-factor two-factor-toggle"><?php
 		}
+
 		$primary_provider = get_user_meta( $user->ID, self::PROVIDER_USER_META_KEY, true );
 		wp_nonce_field( 'user_two_factor_options', '_nonce_user_two_factor_options', false );
+
 		?>
-		<h3><?php esc_html_e( 'Two Step Verification' ); ?></h3>
+		<table class="wp-list-table widefat striped">
+			<thead>
+				<tr>
+					<td class="manage-column"><label class="screen-reader-text"><?php _e( 'Enabled' ); ?></label></td>
+					<th scope="col" class="manage-column"><?php _e( 'Method' ); ?></th>
+					<th scope="col" class="manage-column"><?php _e( 'Configurations' ); ?></th>
+					<th scope="col" class="manage-column"><?php _e( 'Options' ); ?></th>
+				</tr>
+			</thead>
+			<tbody>
+			<input type="hidden" name="<?php echo esc_attr( self::ENABLED_PROVIDERS_USER_META_KEY ); ?>[]" value="<?php /* Dummy input so $_POST value is passed when no providers are enabled. */ ?>" />
+			<?php foreach ( self::get_providers() as $class => $object ) : ?>
+				<tr>
+					<th scope="row" class="check-column">
+					<input type="checkbox" id="method-<?php echo esc_attr( $class ); ?>" name="<?php echo esc_attr( self::ENABLED_PROVIDERS_USER_META_KEY ); ?>[]" value="<?php echo esc_attr( $class ); ?>" <?php checked( in_array( $class, $enabled_providers ) ); ?>>
+					</th>
+					<td data-colname="Method">
+						<label for="method-<?php echo esc_attr( $class ); ?>"><?php $object->print_label(); ?></a>
+					</td>
+					<td data-colname="Configurations">
+						<?php do_action( 'two-factor-user-options-' . $class, $user ); ?>
+					</td>
+					<td data-colname="Options">
+						<!-- <?php do_action( 'two-factor-user-options-' . $class, $user ); ?> -->
+					</td>
+				</tr>
+			<?php endforeach; ?>
+			</tbody>
+		</table>
 
-		<table class="form-table two-factor-verification" id="two-factor-verification">
-			<tr>
-				<th><?php esc_html_e( 'Verification Methods' ); ?></th>
-				<td>
-					<p class="two-factor-introduction"><?php esc_html_e( 'With Two Step Verification, WordPress requires something you know (your password) and something you have (like your phone or security key) to sign in.' ) ?></p>
-
-					<table class="two-factor-methods-table widefat">
-						<thead>
-							<tr>
-								<th class="col-enabled" scope="col"><span class="screen-reader-text"><?php esc_html_e( 'Enabled' ); ?></span></th>
-								<th class="col-name" scope="col"><?php esc_html_e( 'Verification Method' ); ?></th>
-							</tr>
-						</thead>
-						<tbody>
-						<input type="hidden" name="<?php echo esc_attr( self::ENABLED_PROVIDERS_USER_META_KEY ); ?>[]" value="<?php /* Dummy input so $_POST value is passed when no providers are enabled. */ ?>" />
-						<?php foreach ( self::get_providers() as $class => $object ) : ?>
-							<tr>
-								<th class="method-enable" scope="row"><input type="checkbox" id="method-<?php echo esc_attr( $class ); ?>" name="<?php echo esc_attr( self::ENABLED_PROVIDERS_USER_META_KEY ); ?>[]" value="<?php echo esc_attr( $class ); ?>" <?php checked( in_array( $class, $enabled_providers ) ); ?> /></th>
-								<td>
-									<h4 class="two-factor-provider-label"><label for="method-<?php echo esc_attr( $class ); ?>"><?php $object->print_label(); ?></a></h4>
-									<?php do_action( 'two-factor-user-options-' . $class, $user ); ?>
-								</td>
-							</tr>
-						<?php endforeach; ?>
-						</tbody>
-					</table>
-				</td>
-			</tr>
+		</div>
+		</td></tr>
 		</table>
 		<?php
+
 		/**
-		 * Fires after the Two Factor methods table.
+	 	 * Fires after the Two Factor methods table.
+	 	 *
+	 	 * To be used by Two Factor methods to add settings UI.
 		 *
-		 * To be used by Two Factor methods to add settings UI.
-		 *
-		 * @since 0.1-dev
-		 */
+	 	 * @since 0.1-dev
+	 	 */
 		do_action( 'show_user_security_settings', $user );
 	}
 
