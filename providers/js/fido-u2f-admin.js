@@ -31,7 +31,7 @@
 				// See: http://stackoverflow.com/questions/833032/submit-is-not-a-function-error-in-javascript
 				$('<form>')[0].submit.call($('#your-profile')[0]);
 			});
-		}, $(this)), 2000);
+		}, $(this)), 5000);
 	});
 
 	$('button.two-factor-toggle').click(function() {

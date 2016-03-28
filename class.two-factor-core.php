@@ -590,7 +590,6 @@ class Two_Factor_Core {
 		wp_enqueue_style( 'user-edit-2fa', plugins_url( 'user-edit.css', __FILE__ ) );
 		$enabled_providers = get_user_meta( $user->ID, self::ENABLED_PROVIDERS_USER_META_KEY, true );
 
-		// if ( IS_PROFILE_PAGE )
 		?>
 		<h2><?php _e( 'Sign-in Methods' ); ?></h2>
 		<table class="form-table">
@@ -612,6 +611,7 @@ class Two_Factor_Core {
 			<?php
 		} else {
 			?><div class="two-factor two-factor-toggle"><?php
+
 		}
 
 		$primary_provider = get_user_meta( $user->ID, self::PROVIDER_USER_META_KEY, true );

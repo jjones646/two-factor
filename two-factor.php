@@ -19,6 +19,9 @@ if ( ! defined( 'WPINC' ) ) {
  */
 define( 'TWO_FACTOR_DIR', plugin_dir_path( __FILE__ ) );
 
+require_once( TWO_FACTOR_DIR . 'vendor/autoload.php' );
+$connector = PhpConsole\Connector::getInstance();
+
 /**
  * Include the base class here, so that other plugins can also extend it.
  */
@@ -29,3 +32,5 @@ require_once( TWO_FACTOR_DIR . 'providers/class.two-factor-provider.php' );
  */
 require_once( TWO_FACTOR_DIR . 'class.two-factor-core.php' );
 Two_Factor_Core::add_hooks();
+
+
