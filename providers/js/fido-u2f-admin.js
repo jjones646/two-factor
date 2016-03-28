@@ -48,6 +48,7 @@
 		var e = $('div.security-keys > div.two-factor-toggle.two-factor-fido-u2f');
 		if ($(this).hasClass('clicked')) {
 			e.slideDown();
+			$(e + ' + div').slideUp();
 		} else {
 			e.slideUp();
 		}
