@@ -41,7 +41,7 @@
 		});
 	});
 
-	$('button.two-factor-toggle.two-factor-fido-u2f').click(function() {
+	$('button.two-factor-fido-u2f').click(function() {
 		console.log($(this));
 		$(this).toggleClass('clicked');
 		$(this).prop('disabled', !$(this).prop('disabled'));
