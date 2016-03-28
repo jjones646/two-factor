@@ -42,11 +42,9 @@
 	});
 
 	$('button.two-factor-toggle.two-factor-fido-u2f').click(function() {
-		if ($(this).hasClass('clicked')) {
-			return false;
-		}
-		
-		$(this).addClass('clicked').prop('disabled', true);
+		console.log($(this));
+		$(this).toggleClass('clicked')
+		$(this).prop('disabled', !$(this).prop('disabled'));
 		$('div.two-factor-toggle.two-factor-fido-u2f > table.wp-list-table').slideDown();
 	});
 })(jQuery);
