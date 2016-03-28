@@ -1,6 +1,6 @@
 /* global u2f, u2fL10n */
 (function($) {
-	$('button.two-factor-fido-u2f.two-factor-register').click(function() {
+	$('button.two-factor-register.two-factor-fido-u2f').click(function() {
 		if ($(this).hasClass('clicked')) {
 			return false;
 		}
@@ -34,7 +34,7 @@
 		}, $(this)), 1000);
 	});
 
-	$('button.two-factor-toggle.two-factor').has('').click(function() {
+	$('button.two-factor-toggle.two-factor').click(function() {
 		$(this).prop('disabled', true);
 		$('td > .two-factor-toggle').slideUp(125, function() {
 			$('td > div.two-factor-toggle').slideDown();
@@ -50,7 +50,7 @@
 		$(this).prop('disabled', true);
 		$('div.security-keys > .wp-list-table.widefat').slideDown(250, function() {
 
-		}
+		});
 
 	});
 })(jQuery);
