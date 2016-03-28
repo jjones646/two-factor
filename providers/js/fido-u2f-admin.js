@@ -32,16 +32,18 @@
 				$('<form>')[0].submit.call($('#your-profile')[0]);
 			});
 		}, $(this)), 1000);
+		console.log($(this));
 	});
 
 	$('button.two-factor-toggle.two-factor').click(function() {
+		console.log($(this));
 		$(this).prop('disabled', true);
 		$('td > .two-factor-toggle').slideUp(125, function() {
 			$('td > div.two-factor-toggle').slideDown();
 		});
 	});
 
-	$('button.two-factor-fido-u2f').click(function() {
+	$('button.two-factor-toggle.two-factor-fido-u2f').click(function() {
 		console.log($(this));
 		$(this).toggleClass('clicked');
 		$(this).prop('disabled', !$(this).prop('disabled'));
