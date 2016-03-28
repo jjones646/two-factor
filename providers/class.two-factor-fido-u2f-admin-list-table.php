@@ -108,7 +108,7 @@ class Two_Factor_FIDO_U2F_Admin_List_Table extends WP_List_Table {
 	 */
 	public function inline_edit() {
 		?>
-		<table style="display: none">
+<!-- 		<table style="display: none">
 			<tbody id="inlineedit">
 				<tr id="inline-edit" class="inline-edit-row" style="display: none">
 					<td colspan="<?php echo esc_attr( $this->get_column_count() ); ?>" class="colspanchange">
@@ -144,7 +144,7 @@ class Two_Factor_FIDO_U2F_Admin_List_Table extends WP_List_Table {
 					</td>
 				</tr>
 			</tbody>
-		</table>
+		</table> -->
 		<?php
 	}
 }
