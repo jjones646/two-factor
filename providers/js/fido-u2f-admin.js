@@ -47,11 +47,13 @@
 		$(this).toggleClass('clicked');
 		var e = $('div.security-keys > div.two-factor-toggle.two-factor-fido-u2f');
 		if ($(this).hasClass('clicked')) {
-			e.slideDown();
-			e.parent().parent().children().last().slideUp();
+			e.parent().parent().children().last().slideUp(125, function(){
+				e.slideDown();
+			});
 		} else {
-			e.slideUp();
-			e.parent().parent().children().last().slideDown();
+			e.slideUp(250, function(){
+				e.parent().parent().children().last().slideDown();
+			});
 		}
 	});
 })(jQuery);
