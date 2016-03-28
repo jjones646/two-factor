@@ -17,9 +17,13 @@
 				if (data.errorCode) {
 					_this.text(btnTxt);
 					_this.removeClass('clicked');
-					alert('Registration failed.', data.errorCode);
 
-					return false;
+					$.each(u2f.ErrorCodes, function(k, v) {
+						if (v == data.errorCode) {
+							alert('Registration failed: ' + k + '.');
+							return false;
+						}
+					});
 				}
 
 				$('#do_new_security_key').val('true');
@@ -27,7 +31,7 @@
 				// See: http://stackoverflow.com/questions/833032/submit-is-not-a-function-error-in-javascript
 				$('<form>')[0].submit.call($('#your-profile')[0]);
 			});
-		}, $(this)), 1000);
+		}, $(this)), 2000);
 	});
 
 	$('button.two-factor-toggle').click(function() {
@@ -37,7 +41,7 @@
 		});
 	});
 
-	$('button.two-factor-fido-u2f two-factor-toggle').click(function() {
+	$('button.two-factor-fido-u2f.two-factor-toggle').click(function() {
 		if ($(this).hasClass('clicked')) {
 			return false;
 		}
