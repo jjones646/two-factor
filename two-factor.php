@@ -19,9 +19,6 @@ if ( ! defined( 'WPINC' ) ) {
  */
 define( 'TWO_FACTOR_DIR', plugin_dir_path( __FILE__ ) );
 
-require_once( TWO_FACTOR_DIR . 'vendor/autoload.php' );
-$connector = PhpConsole\Connector::getInstance();
-
 /**
  * Include the base class here, so that other plugins can also extend it.
  */
