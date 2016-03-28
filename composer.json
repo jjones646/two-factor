@@ -1,7 +1,6 @@
 {
 	"require": {
-        "yubico/u2flib-server": "1.*",
-		"php-console/php-console": "~3.0"
+        "yubico/u2flib-server": "1.*"
     },
 	"require-dev": {
 		"satooshi/php-coveralls": "~1.0.0"
