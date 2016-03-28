@@ -43,8 +43,8 @@
 
 	$('button.two-factor-toggle.two-factor-fido-u2f').click(function() {
 		console.log($(this));
-		$(this).toggleClass('clicked')
+		$(this).toggleClass('clicked');
 		$(this).prop('disabled', !$(this).prop('disabled'));
-		$('div.two-factor-toggle.two-factor-fido-u2f > table.wp-list-table').slideDown();
+		$('div.two-factor-toggle.two-factor-fido-u2f > .wp-list-table').slideDown();
 	});
 })(jQuery);
