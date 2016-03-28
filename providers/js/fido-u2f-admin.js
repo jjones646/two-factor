@@ -44,9 +44,12 @@
 	});
 
 	$('button.two-factor-toggle.two-factor-fido-u2f').click(function() {
-		console.log($(this));
 		$(this).toggleClass('clicked');
-		// $(this).prop('disabled', !$(this).prop('disabled'));
-		$('div.security-keys > div.two-factor-toggle.two-factor-fido-u2f').slideDown();
+		var e = $('div.security-keys > div.two-factor-toggle.two-factor-fido-u2f');
+		if ($(this).hasClass('clicked')) {
+			e.slideDown();
+		} else {
+			e.slideUp();
+		}
 	});
 })(jQuery);
