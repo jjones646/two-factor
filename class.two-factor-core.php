@@ -636,7 +636,7 @@ class Two_Factor_Core {
 				<tr class="inactive">
 				<?php endif; ?>
 					<th scope="row" class="check-column">
-					<input type="checkbox" id="method-<?php echo esc_attr( $class ); ?>" name="<?php echo esc_attr( self::ENABLED_PROVIDERS_USER_META_KEY ); ?>[]" value="<?php echo esc_attr( $class ); ?>" <?php checked( in_array( $class, $enabled_providers ) ); ?>>
+					<input type="checkbox" id="method-<?php echo esc_attr( $class ); ?>" name="<?php echo esc_attr( self::ENABLED_PROVIDERS_USER_META_KEY ); ?>[]" value="<?php echo esc_attr( $class ); ?>" <?php checked( $object->is_available_for_user( $user ) ); ?>>
 					</th>
 					<td data-colname="Method" class="column-slug">
 						<label for="method-<?php echo esc_attr( $class ); ?>"><?php $object->print_label(); ?></a>
