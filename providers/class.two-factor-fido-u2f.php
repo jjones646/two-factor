@@ -1,8 +1,10 @@
 <?php
+
 // If this file is called directly, abort.
 if ( ! defined( 'ABSPATH' ) ) {
 	die;
 }
+
 /**
  * Class for creating a FIDO Universal 2nd Factor provider.
  *
@@ -118,7 +120,7 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 			return null;
 		}
 		?>
-		<p><?php esc_html_e( 'Now insert (and tap) your Security Key.' ); ?></p>
+		<p><?php esc_html_e( 'Insert and/or tap your Security Key.' ); ?></p>
 		<input type="hidden" name="u2f_response" id="u2f_response" />
 		<script>
 			u2fL10n = <?php echo wp_json_encode( array(
@@ -176,9 +178,10 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 	 * @param WP_User $user WP_User object of the logged-in user.
 	 */
 	public function user_options( $user ) {
+		$num_keys = count( self::get_security_keys( $user->ID ) );
 		?>
 		<div>
-			<?php echo esc_html( __( 'You need to register security keys such as Yubikey.' ) ); ?>
+		<?php echo esc_html( __( 'You currently have ' . sprintf( __( '%u' ), $num_keys ) . ' Security ' . _n( 'Key', 'Keys', $num_keys ) . ' registered.' ) ); ?>
 		</div>
 		<?php
 	}
