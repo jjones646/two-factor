@@ -188,9 +188,7 @@ class Two_Factor_Email extends Two_Factor_Provider {
 	public function user_options( $user ) {
 		$email = $user->user_email;
 		?>
-		<p>
-			<?php esc_html( sprintf( __( 'Authentication codes will be sent to %1$s.' ), $email ) ); ?>
-		</p>
+		<p><?php esc_html( sprintf( __( 'Authentication codes will be sent to %1$s.' ), $email ) ); ?></p>
 		<?php
 	}
 }

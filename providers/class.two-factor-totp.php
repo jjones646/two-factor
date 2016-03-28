@@ -39,12 +39,11 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	 * Class constructor. Sets up hooks, etc.
 	 */
 	protected function __construct() {
-		add_action( 'admin_enqueue_scripts',       			array( __CLASS__, 'enqueue_assets' ) );
-		add_action( 'two-factor-user-options-' . __CLASS__, array( $this, 'user_two_factor_options' ) );
-		add_action( 'personal_options_update',              array( $this, 'user_two_factor_options_update' ) );
-		add_action( 'edit_user_profile_update',             array( $this, 'user_two_factor_options_update' ) );
+		add_action( 'admin_enqueue_scripts',       			array( $this, 'enqueue_assets' ) );
+		add_action( 'two-factor-user-options-' . __CLASS__, array( $this, 'user_options' ) );
+		add_action( 'personal_options_update',              array( $this, 'user_options_update' ) );
+		add_action( 'edit_user_profile_update',             array( $this, 'user_options_update' ) );
 
-		
 		return parent::__construct();
 	}
 
@@ -93,7 +92,7 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	 *
 	 * @param WP_User $user The current user being edited.
 	 */
-	public function user_two_factor_options( $user ) {
+	public function user_options( $user ) {
 		if ( ! isset( $user->ID ) ) {
 			return false;
 		}
@@ -127,11 +126,11 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	}
 
 	/**
-	 * Save the options specified in `::user_two_factor_options()`
+	 * Save the options specified in `::user_options()`
 	 *
 	 * @param integer $user_id The user ID whose options are being updated.
 	 */
-	public function user_two_factor_options_update( $user_id ) {
+	public function user_options_update( $user_id ) {
 		if ( isset( $_POST['_nonce_user_two_factor_totp_options'] ) ) {
 			check_admin_referer( 'user_two_factor_totp_options', '_nonce_user_two_factor_totp_options' );
 

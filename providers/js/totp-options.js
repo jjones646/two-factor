@@ -3,13 +3,9 @@
         $(this).toggleClass('clicked');
         var e = $('#two-factor-totp-options');
         if ($(this).hasClass('clicked')) {
-            e.parent().parent().children().last().slideUp(125, function(){
-                // e.slideDown();
-            });
+            e.slideDown();
         } else {
-            e.slideUp(125, function(){
-                // e.parent().parent().children().last().slideDown();
-            });
+            e.slideUp();
         }
     });
 })(jQuery);
