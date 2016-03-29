@@ -28,7 +28,7 @@ class Two_Factor_Email extends Two_Factor_Provider {
 	 */
 	protected function __construct() {
 		add_action( 'admin_enqueue_scripts',       			array( $this, 'enqueue_assets' ) );
-		add_action( 'two-factor-user-options-' . __CLASS__, array( $this, 'user_options' ) );
+		add_action( 'two-factor-user-options-' . __CLASS__, array( $this, 'print_user_options' ) );
 		return parent::__construct();
 	}
 
@@ -206,7 +206,7 @@ class Two_Factor_Email extends Two_Factor_Provider {
 	 *
 	 * @param WP_User $user WP_User object of the logged-in user.
 	 */
-	public function user_options( $user ) {
+	public function print_user_options( $user ) {
 		$email = $user->user_email;
 		?>
 		<p><?php esc_html( sprintf( __( 'Authentication codes will be sent to %1$s.' ), $email ) ); ?></p>

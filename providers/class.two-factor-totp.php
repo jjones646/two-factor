@@ -40,7 +40,7 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	 */
 	protected function __construct() {
 		add_action( 'admin_enqueue_scripts',       			array( $this, 'enqueue_assets' ) );
-		add_action( 'two-factor-user-options-' . __CLASS__, array( $this, 'user_options' ) );
+		add_action( 'two-factor-user-options-' . __CLASS__, array( $this, 'print_user_options' ) );
 		add_action( 'personal_options_update',              array( $this, 'user_options_update' ) );
 		add_action( 'edit_user_profile_update',             array( $this, 'user_options_update' ) );
 
@@ -86,7 +86,7 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	 * Returns the name of the provider.
 	 */
 	public function get_label() {
-		return _x( 'Verification Codes', 'Provider Label' );
+		return _x( 'Authenticator App', 'Provider Label' );
 	}
 
 	/**
@@ -94,7 +94,7 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	 *
 	 * @param WP_User $user The current user being edited.
 	 */
-	public function user_options( $user ) {
+	public function print_user_options( $user ) {
 		if ( ! isset( $user->ID ) ) {
 			return false;
 		}
@@ -128,7 +128,7 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	}
 
 	/**
-	 * Save the options specified in `::user_options()`
+	 * Save the options specified in `::print_user_options()`
 	 *
 	 * @param integer $user_id The user ID whose options are being updated.
 	 */

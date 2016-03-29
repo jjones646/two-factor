@@ -78,6 +78,24 @@ abstract class Two_Factor_Provider {
 	abstract function is_available_for_user( $user );
 
 	/**
+	 * Inserts markup at the end of the user profile field for this provider.
+	 *
+	 * @since 0.2-dev
+	 *
+	 * @param WP_User $user WP_User object of the logged-in user.
+	 */
+	abstract function print_user_options( $user );
+
+	/**
+	 * Inserts markup at the end of the user profile field for this provider.
+	 *
+	 * @since 0.2-dev
+	 *
+	 * @param WP_User $user WP_User object of the logged-in user.
+	 */
+	abstract function print_user_option_details( $user );
+
+	/**
 	 * Generate a random eight-digit string to send out as an auth code.
 	 *
 	 * @since 0.1-dev

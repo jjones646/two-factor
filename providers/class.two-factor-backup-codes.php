@@ -35,7 +35,7 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	 */
 	protected function __construct() {
 		add_action( 'admin_enqueue_scripts',       				array( $this, 'enqueue_assets' ) );
-		add_action( 'two-factor-user-options-' . __CLASS__, 	array( $this, 'user_options' ) );
+		add_action( 'two-factor-user-options-' . __CLASS__, 	array( $this, 'print_user_options' ) );
 		add_action( 'admin_notices', 							array( $this, 'admin_notices' ) );
 		add_action( 'wp_ajax_two_factor_backup_codes_generate', array( $this, 'ajax_generate_json' ) );
 
@@ -145,7 +145,7 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	 *
 	 * @param WP_User $user WP_User object of the logged-in user.
 	 */
-	public function user_options( $user ) {
+	public function print_user_options( $user ) {
 		$ajax_nonce = wp_create_nonce( 'two-factor-backup-codes-generate-json-' . $user->ID );
 		$count = self::codes_remaining_for_user( $user );
 		?>
