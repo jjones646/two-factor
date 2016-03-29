@@ -636,9 +636,13 @@ class Two_Factor_Core {
 					<td data-colname="Method" class="plugin-title column-primary"><strong><?php $object->print_label(); ?></strong>
 						<div class="row-actions visible">
 							<?php if ( $object->is_available_for_user( $user ) ) : ?>
-							<span class="<?php esc_html_e( 'deactivate' ); ?>"/>
+							<span class="<?php esc_html_e( 'deactivate' ); ?>">
+							<a href="#" aria-label="Deactivate <?php $object->print_label(); ?>">Deactivate</a>
+							</span>
 							<?php else : ?>
-							<span class="<?php esc_html_e( 'activate' ); ?>"/>
+							<span class="<?php esc_html_e( 'activate' ); ?>">
+							<a href="#" aria-label="Activate <?php $object->print_label(); ?>">Deactivate</a>
+							</span>
 							<?php endif; ?>
 						</div>
 					</td>
