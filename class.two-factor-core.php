@@ -616,21 +616,25 @@ class Two_Factor_Core {
 		$primary_provider = get_user_meta( $user->ID, self::PROVIDER_USER_META_KEY, true );
 		wp_nonce_field( 'user_two_factor_options', '_nonce_user_two_factor_options', false );
 
+		if ( ! is_user_using_two_factor() ) {
+			?>
+			<input type="hidden" name="<?php echo esc_attr( self::ENABLED_PROVIDERS_USER_META_KEY ); ?>[]" value="<?php /* Dummy input so $_POST value is passed when no providers are enabled. */ ?>"/>
+			<?php
+		}
+
 		?>
 		<table class="wp-list-table widefat striped two-factor-table plugins">
 			<thead>
 				<tr>
-					<td id="cb" class="manage-column column-cb check-column">
+					<td class="manage-column column-cb check-column">
 						<label class="screen-reader-text" for="cb-select-all-1">Select All</label>
-						<!-- <input id="cb-select-all-1" type="checkbox"> -->
 					</td>
 					<th scope="col" class="manage-column column-primary"><?php _e( 'Method' ); ?></th>
-					<th scope="col" class="manage-column"><?php _e( 'Details' ); ?></th>
+					<th scope="col" class="manage-column column-description"><?php _e( 'Details' ); ?></th>
 					<th scope="col" class="manage-column column-description"><?php _e( 'Options' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
-			<input type="hidden" name="<?php echo esc_attr( self::ENABLED_PROVIDERS_USER_META_KEY ); ?>[]" value="<?php /* Dummy input so $_POST value is passed when no providers are enabled. */ ?>" />
 			<?php foreach ( self::get_providers() as $class => $object ) : ?>
 				<?php if ( $object->is_available_for_user( $user ) ) : ?>
 				<tr class="active">
@@ -638,8 +642,8 @@ class Two_Factor_Core {
 				<tr class="inactive">
 				<?php endif; ?>
 					<th scope="row" class="check-column">
-						<label class="screen-reader-text" for="">Select <?php $object->print_label(); ?></label>
-						<!-- <input type="checkbox" name="checked[]" value="" id=""> -->
+						<label class="screen-reader-text">Select <?php $object->print_label(); ?></label>
+						<input type="checkbox" name="checked[]" value="<?php $object->is_available_for_user( $user ); ?>">
 					</th>
 					<td data-colname="Method" class="plugin-title column-primary"><strong><?php $object->print_label(); ?></strong>
 						<div class="row-actions visible">
@@ -649,12 +653,12 @@ class Two_Factor_Core {
 							</span>
 							<?php else : ?>
 							<span class="<?php esc_html_e( 'activate' ); ?>">
-							<a href="#" aria-label="Activate <?php $object->print_label(); ?>">Deactivate</a>
+							<a href="#" aria-label="Activate <?php $object->print_label(); ?>">Activate</a>
 							</span>
 							<?php endif; ?>
 						</div>
 					</td>
-					<td data-colname="Details" class="alignleft">
+					<td data-colname="Details" class="column-description desc">
 						<?php do_action( 'two-factor-user-option-details-' . $class, $user ); ?>
 					</td>
 					<td data-colname="Options" class="column-description desc">
