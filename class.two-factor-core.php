@@ -631,7 +631,6 @@ class Two_Factor_Core {
 					</td>
 					<th scope="col" class="manage-column column-primary"><?php _e( 'Method' ); ?></th>
 					<th scope="col" class="manage-column column-description"><?php _e( 'Details' ); ?></th>
-					<th scope="col" class="manage-column column-description"><?php _e( 'Options' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -658,12 +657,12 @@ class Two_Factor_Core {
 							<?php endif; ?>
 						</div>
 					</td>
+					<!-- <?php do_action( 'two-factor-user-option-details-' . $class, $user ); ?> -->
 					<td data-colname="Details" class="column-description desc">
-						<!-- <?php do_action( 'two-factor-user-option-details-' . $class, $user ); ?> -->
-						<?php $object->print_description(); ?>
-					</td>
-					<td data-colname="Options" class="column-description desc">
 						<div class="plugin-description">
+						<?php $object->print_description(); ?>
+						</div>
+						<div>
 						<?php do_action( 'two-factor-user-options-' . $class, $user ); ?>
 						</div>
 					</td>
