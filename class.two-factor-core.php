@@ -659,7 +659,7 @@ class Two_Factor_Core {
 					</td>
 					
 					<td data-colname="Details" class="column-details desc">
-						<div class="plugin-description">
+						<div class="plugin-description two-factor-column-details">
 						<?php $object->print_description(); ?>
 						</div>
 						<div>
