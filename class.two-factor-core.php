@@ -563,7 +563,6 @@ class Two_Factor_Core {
 	 * @return string              The column output.
 	 */
 	public static function manage_users_custom_column( $output, $column_name, $user_id ) {
-
 		if ( 'two-factor' !== $column_name ) {
 			return $output;
 		}
@@ -630,10 +629,10 @@ class Two_Factor_Core {
 			<tbody>
 			<input type="hidden" name="<?php echo esc_attr( self::ENABLED_PROVIDERS_USER_META_KEY ); ?>[]" value="<?php /* Dummy input so $_POST value is passed when no providers are enabled. */ ?>" />
 			<?php foreach ( self::get_providers() as $class => $object ) : ?>
-				<?php if ( in_array( $class, $enabled_providers ) ) : ?>
-				<tr class="active">
+				<?php if ( $object->is_available_for_user( $user ) ) : ?>
+				<tr class="notice notice-info">
 				<?php else : ?>
-				<tr class="inactive">
+				<tr class="notice">
 				<?php endif; ?>
 					<th scope="row" class="check-column">
 					<input type="checkbox" id="method-<?php echo esc_attr( $class ); ?>" name="<?php echo esc_attr( self::ENABLED_PROVIDERS_USER_META_KEY ); ?>[]" value="<?php echo esc_attr( $class ); ?>" <?php checked( $object->is_available_for_user( $user ) ); ?>>
