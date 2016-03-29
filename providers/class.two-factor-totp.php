@@ -111,17 +111,16 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 
 		wp_nonce_field( 'user_two_factor_totp_options', '_nonce_user_two_factor_totp_options', false );
 		$key = get_user_meta( $user->ID, self::SECRET_META_KEY, true );
-		// $this->admin_notices();
 
 		if ( empty( $key ) ) {
 			$key = $this->generate_key();
 			$site_name = get_bloginfo( 'name', 'display' );
 			?>
-			<p><button type="button" class="button button-secondary two-factor-totp two-factor-register"><?php esc_html_e( 'Setup Authenticator App' ); ?></button></p>
+			<p><button type="button" class="button button-secondary two-factor-totp two-factor-register"><?php esc_html_e( 'Setup App' ); ?></button></p>
 			<div id="two-factor-totp-options" class="two-factor-register two-factor-totp hide-if-js">
 				<img src="<?php echo esc_url( $this->get_google_qr_code( $site_name . ':' . $user->user_login, $key, $site_name ) ); ?>" id="two-factor-totp-qrcode" />
 				<p><strong><?php echo esc_html( $key ); ?></strong></p>
-				<p><?php esc_html_e( 'Please scan the QR code or use the provided key. Optionally, you can give an authentication code from your app.' ); ?></p>
+				<p><?php esc_html_e( 'Scan the QR code or use the provided key. Optionally, you can give an authentication code from your app.' ); ?></p>
 				<p>
 					<label for="two-factor-totp-authcode"><?php esc_html_e( 'Authentication Code:' ); ?></label>
 					<input type="hidden" name="two-factor-totp-key" value="<?php echo esc_attr( $key ) ?>" />
@@ -131,7 +130,7 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 			<?php
 		} else {
 			?>
-			<p><button type="button" class="button button-secondary two-factor-totp two-factor-unregister"><?php esc_html_e( 'Disable' ); ?></button></p>
+			<p><button type="button" class="button button-secondary two-factor-totp two-factor-unregister"><?php esc_html_e( 'Delete App Key' ); ?></button></p>
 			<?php
 		}
 	}
