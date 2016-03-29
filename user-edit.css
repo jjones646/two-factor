@@ -6,9 +6,9 @@
 
 }
 
-.two-factor-table .wp-list-table {
+/*.two-factor-table .wp-list-table {
 	width: 70%;
-}
+}*/
 
 #two-factor-profile-option {
 
@@ -26,6 +26,14 @@
 .application-passwords table,
 .security-keys table {
 	margin: 1em 0;
+}
+
+.two-factor-table .column-method { 
+    width: 20%;
+}
+
+.two-factor-table .column-details { 
+    width: 80%;
 }
 
 /*.two-factor-verification .two-factor-introduction {

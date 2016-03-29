@@ -629,8 +629,8 @@ class Two_Factor_Core {
 					<td class="manage-column column-cb check-column">
 						<label class="screen-reader-text" for="cb-select-all-1">Select All</label>
 					</td>
-					<th scope="col" class="manage-column column-name column-primary"><?php _e( 'Method' ); ?></th>
-					<th scope="col" class="manage-column column-description"><?php _e( 'Details' ); ?></th>
+					<th scope="col" class="manage-column column-method column-primary"><?php _e( 'Method' ); ?></th>
+					<th scope="col" class="manage-column column-details"><?php _e( 'Details' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -642,9 +642,9 @@ class Two_Factor_Core {
 				<?php endif; ?>
 					<th scope="row" class="check-column">
 						<label class="screen-reader-text">Select <?php $object->print_label(); ?></label>
-						<input type="checkbox" name="checked[]" value="<?php $object->is_available_for_user( $user ); ?>">
+						<input type="hidden" name="checked[]" value="<?php $object->is_available_for_user( $user ); ?>">
 					</th>
-					<td data-colname="Method" class="plugin-title column-primary"><strong><?php $object->print_label(); ?></strong>
+					<td data-colname="Method" class="plugin-title column-method column-primary"><strong><?php $object->print_label(); ?></strong>
 						<div class="row-actions visible">
 							<?php if ( $object->is_available_for_user( $user ) ) : ?>
 							<span class="<?php esc_html_e( 'deactivate' ); ?>">
@@ -658,7 +658,7 @@ class Two_Factor_Core {
 						</div>
 					</td>
 					
-					<td data-colname="Details" class="column-description desc">
+					<td data-colname="Details" class="column-details desc">
 						<div class="plugin-description">
 						<?php $object->print_description(); ?>
 						</div>
