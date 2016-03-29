@@ -38,8 +38,8 @@ class Two_Factor_FIDO_U2F_Admin {
 		add_action( 'wp_ajax_inline-save-key',     array( __CLASS__, 'wp_ajax_inline_save' ) );
 
 		if ( ! empty( $provider ) ) {
-			add_action( 'two-factor-user-options-' . 		__CLASS__, 	array( $provider, 'print_user_options' ) );
-			// add_action( 'two-factor-user-option-details-' . __CLASS__, 	array( $this, 'print_user_option_details' ) );
+			add_action( 'two-factor-user-options-' . $provider,		array( __CLASS__, 'print_user_options' ) );
+			// add_action( 'two-factor-user-option-details-' . $provider, 	array( __CLASS__, 'print_user_option_details' ) );
 		}
 	}
 
@@ -166,6 +166,7 @@ class Two_Factor_FIDO_U2F_Admin {
 				$u2f_list_table->inline_edit();
 			}
 			?>
+		</div>
 		</div>
 		<?php
 	}
