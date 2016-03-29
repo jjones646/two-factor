@@ -146,8 +146,8 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 		} else {
 			$message .= 'enabled';
 		}
-		
-		esc_html_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'two-factor-details', $message ) );
+
+		_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'two-factor-details', $message ) );
 	}
 
 	/**
