@@ -28,6 +28,10 @@
 	margin: 1em 0;
 }
 
+.two-factor-details {
+    font-style: italic;
+}
+
 .two-factor-table .column-method { 
     width: 20%;
 }
