@@ -38,7 +38,7 @@ class Two_Factor_FIDO_U2F_Admin {
 		add_action( 'wp_ajax_inline-save-key',     array( __CLASS__, 'wp_ajax_inline_save' ) );
 
 		if ( ! empty( $provider ) ) {
-			add_action( 'two-factor-user-options-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
+			add_action( 'two-factor-user-options-' . 		__CLASS__, 	array( $provider, 'print_user_options' ) );
 			// add_action( 'two-factor-user-option-details-' . __CLASS__, 	array( $this, 'print_user_option_details' ) );
 		}
 	}
@@ -103,10 +103,15 @@ class Two_Factor_FIDO_U2F_Admin {
 	 * @param WP_User $user WP_User object of the logged-in user.
 	 */
 	public static function print_user_options( $user ) {
+		if ( ! isset( $user->ID ) ) {
+			return false;
+		}
+
 		wp_nonce_field( "user_security_keys-{$user->ID}", '_nonce_user_security_keys' );
 		$new_key = false;
 
 		$security_keys = Two_Factor_FIDO_U2F::get_security_keys( $user->ID );
+		$num_keys = count( $security_keys );
 
 		if ( $security_keys ) {
 			foreach ( $security_keys as &$security_key ) {
@@ -121,6 +126,7 @@ class Two_Factor_FIDO_U2F_Admin {
 			unset( $security_key );
 		}
 
+		// _e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'two-factor-options', $message ) );
 		?>
 		<div class="security-keys" id="security-keys-section">
 			<div class="register-security-key">
@@ -139,7 +145,7 @@ class Two_Factor_FIDO_U2F_Admin {
 					<?php endif; ?>
 
 					<?php else : ?>
-					<p class="description"><?php esc_html_e( 'You are using an unsupported browser. Security Keys are only supported in Chrome 41+. ' ); ?><a href="https://support.google.com/accounts/answer/6103523"><?php _e( 'More Information' ); ?></a></p>
+					<p class="description"><?php esc_html_e( 'You are using an unsupported browser. Security Keys are only supported in Chrome 41+. ' ); ?><a href="https://support.google.com/accounts/answer/6103523"><?php esc_html_e( 'More Information' ); ?></a></p>
 
 					<?php endif; ?>
 				<?php endif; ?>
@@ -148,6 +154,7 @@ class Two_Factor_FIDO_U2F_Admin {
 			<?php if ( $new_key ) : ?>
 			<p class="new-security-key"><?php esc_html_e( 'Security Key successfully registered.' ); ?></p>
 			<?php endif; ?>
+
 			<div class="two-factor-fido-u2f two-factor-toggle hide-if-js">
 			<?php
 			if ( ! empty( $security_keys ) ) {
@@ -159,7 +166,6 @@ class Two_Factor_FIDO_U2F_Admin {
 				$u2f_list_table->inline_edit();
 			}
 			?>
-		</div>
 		</div>
 		<?php
 	}
