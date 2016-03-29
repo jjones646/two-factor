@@ -616,7 +616,7 @@ class Two_Factor_Core {
 		$primary_provider = get_user_meta( $user->ID, self::PROVIDER_USER_META_KEY, true );
 		wp_nonce_field( 'user_two_factor_options', '_nonce_user_two_factor_options', false );
 
-		if ( ! is_user_using_two_factor() ) {
+		if ( ! self::is_user_using_two_factor() ) {
 			?>
 			<input type="hidden" name="<?php echo esc_attr( self::ENABLED_PROVIDERS_USER_META_KEY ); ?>[]" value="<?php /* Dummy input so $_POST value is passed when no providers are enabled. */ ?>"/>
 			<?php
