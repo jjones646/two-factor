@@ -185,7 +185,7 @@ class Two_Factor_Email extends Two_Factor_Provider {
 			return false;
 		}
 
-		$message = sprintf( __( 'Authentication codes will be sent to %1$s' ), $user->user_email );
+		$message = sprintf( __( 'Authentication codes will be sent to <strong>%1$s</strong>' ), $user->user_email );
 
 		_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'two-factor-details', $message ) );
 	}

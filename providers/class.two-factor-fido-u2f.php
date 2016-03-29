@@ -224,9 +224,9 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 		$message = '';
 
 		if ( $num_keys ) {
-			$message = esc_html__( 'You currently have' ) . __( sprintf( __( ' <strong>%u</strong> ' ), $num_keys ) ) . esc_html__( 'Security ' . _n( 'Key', 'Keys', $num_keys ) . ' registered.' );
+			$message = esc_html__( 'You currently have' ) . __( sprintf( __( ' <strong>%u</strong> ' ), $num_keys ) ) . esc_html__( 'Security ' . _n( 'Key', 'Keys', $num_keys ) . ' registered' );
 		} else {
-			$message = esc_html__( 'You have not registered any Security Keys.' );
+			$message = esc_html__( 'You have not registered any Security Keys' );
 		}
 
 		_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'two-factor-details', $message ) );
