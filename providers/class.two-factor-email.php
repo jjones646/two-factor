@@ -30,6 +30,7 @@ class Two_Factor_Email extends Two_Factor_Provider {
 		add_action( 'admin_enqueue_scripts',       					array( $this, 'enqueue_assets' ) );
 		add_action( 'two-factor-user-options-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
 		add_action( 'two-factor-user-option-details-' .	__CLASS__, 	array( $this, 'print_user_option_details' ) );
+		
 		return parent::__construct();
 	}
 
@@ -228,7 +229,7 @@ class Two_Factor_Email extends Two_Factor_Provider {
 		$email = $user->user_email;
 
 		?>
-		<p><?php esc_html( sprintf( __( 'Authentication codes will be sent to %1$s.' ), $email ) ); ?></p>
+		<p><?php esc_html_e( sprintf( __( 'Authentication codes will be sent to %1$s.' ), $email ) ); ?></p>
 		<?php
 	}
 }

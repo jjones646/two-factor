@@ -150,27 +150,11 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 		if ( ! isset( $user->ID ) ) {
 			return false;
 		}
-		
-	}
-
-	/**
-	 * Inserts markup at the end of the user profile field for this provider.
-	 *
-	 * @since 0.2-dev
-	 *
-	 * @param WP_User $user WP_User object of the logged-in user.
-	 */
-	public function print_user_option_details( $user ) {
-		if ( ! isset( $user->ID ) ) {
-			return false;
-		}
-
 		$ajax_nonce = wp_create_nonce( 'two-factor-backup-codes-generate-json-' . $user->ID );
 		$count = self::codes_remaining_for_user( $user );
 		?>
 		<p id="two-factor-backup-codes">
 		<?php if ( $count ) : ?>
-			<p><?php _e( sprintf( 'You have %u unused ', $count ) . _n( 'code', 'codes', $count ) . ' remaining.' ); ?></p>
 			<p><button type="button" class="button button-secondary two-factor-backup-codes two-factor-unregister hide-if-no-js"><?php esc_html_e( 'Disable' ); ?></button></p>
 		<?php else : ?>
 			<p><button type="button" class="button button-secondary button-two-factor-backup-codes-generate two-factor-backup-codes two-factor-register hide-if-no-js"><?php esc_html_e( 'Generate Backup Codes' ); ?></button></p>
@@ -223,6 +207,23 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 				} );
 			} )( jQuery );
 		</script>
+		<?php
+	}
+
+	/**
+	 * Inserts markup at the end of the user profile field for this provider.
+	 *
+	 * @since 0.2-dev
+	 *
+	 * @param WP_User $user WP_User object of the logged-in user.
+	 */
+	public function print_user_option_details( $user ) {
+		if ( ! isset( $user->ID ) ) {
+			return false;
+		}
+
+		?>
+		<p><?php _e( sprintf( 'You have %u unused ', $count ) . _n( 'code', 'codes', $count ) . ' remaining.' ); ?></p>
 		<?php
 	}
 
