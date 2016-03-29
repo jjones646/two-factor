@@ -94,7 +94,7 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 
 		$message = sprintf( __( 'Two-Factor: You are out of backup codes and need to <a href="%s">generate more.</a>' ), esc_url( get_edit_user_link( $user->ID ) . '#two-factor-backup-codes' ) );
 
-		esc_html_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'notice notice-error', $message ) );
+		esc_html_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'notice notice-error is-dismissible', $message ) );
 	}
 
 	/**

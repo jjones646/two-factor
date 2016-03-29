@@ -98,7 +98,7 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 
 		$message = __( 'Testing from admin_notices, fido-u2f' );
 
-		esc_html_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'notice notice-error', $message ) );
+		esc_html_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'notice notice-error is-dismissible', $message ) );
 	}
 
 	/**
