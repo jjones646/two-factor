@@ -20,9 +20,9 @@
 	margin: 1em 0;
 }
 
-.two-factor-details {
+/*.two-factor-details {
     font-style: italic;
-}
+}*/
 
 div.two-factor-details > p {
     font-size: 13px !important;
@@ -34,4 +34,8 @@ div.two-factor-details > p {
 
 .two-factor-table .column-details { 
     width: 82%;
+}
+
+.two-factor-column-details {
+    font-style: italic;
 }
