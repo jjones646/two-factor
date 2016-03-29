@@ -148,6 +148,9 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 			return false;
 		}
 
+		$site_name = get_bloginfo( 'name', 'display' );
+		$totp_acct = esc_html__( $site_name . ':' . $user->user_login );
+
 		$message = sprintf( __( '%s' ), $this->get_label() ) . ' is ';
 
 		if ( empty( $key ) ) {
@@ -156,6 +159,7 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 			$message .= 'enabled';
 		}
 
+		$message = $totp_acct;
 		_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'two-factor-details', $message ) );
 	}
 

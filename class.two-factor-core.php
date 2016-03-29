@@ -623,7 +623,7 @@ class Two_Factor_Core {
 		}
 
 		?>
-		<table class="wp-list-table widefat striped two-factor-table plugins">
+		<table class="wp-list-table widefat two-factor-table plugins">
 			<thead>
 				<tr>
 					<td class="manage-column column-cb check-column">
@@ -657,12 +657,13 @@ class Two_Factor_Core {
 							<?php endif; ?>
 						</div>
 					</td>
-					<!-- <?php do_action( 'two-factor-user-option-details-' . $class, $user ); ?> -->
+					
 					<td data-colname="Details" class="column-description desc">
 						<div class="plugin-description">
 						<?php $object->print_description(); ?>
 						</div>
 						<div>
+						<?php do_action( 'two-factor-user-option-details-' . $class, $user ); ?>
 						<?php do_action( 'two-factor-user-options-' . $class, $user ); ?>
 						</div>
 					</td>

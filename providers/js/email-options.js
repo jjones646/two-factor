@@ -1,7 +1,7 @@
 (function($) {
-    $('button.two-factor-register.two-factor-totp').click(function() {
+    $('button.two-factor-register.two-factor-email').click(function() {
         $(this).toggleClass('clicked');
-        var e = $('#two-factor-totp-options');
+        var e = $('#two-factor-email-options');
         if ($(this).hasClass('clicked')) {
             e.slideDown();
         } else {

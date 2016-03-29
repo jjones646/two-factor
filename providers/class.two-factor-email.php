@@ -174,10 +174,8 @@ class Two_Factor_Email extends Two_Factor_Provider {
 		if ( ! isset( $user->ID ) ) {
 			return false;
 		}
-	
-		?>
-		<p><button type="button" class="button button-secondary two-factor-backup-codes two-factor-unregister hide-if-no-js"><?php esc_html_e( 'Disable' ); ?></button></p>
-		<?php
+
+		// Empty on purpose
 	}
 
 	/**
