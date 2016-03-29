@@ -127,7 +127,9 @@ class Two_Factor_FIDO_U2F_Admin {
 			<div class="register-security-key">
 				<?php if ( ! is_ssl() ) : ?>
 					<p class="description"><?php esc_html_e( 'Using Security Keys requires an https connection.' ); ?></p>
+					<?php if ( ! empty( $security_keys ) ) : ?>
 					<p><button type="button" class="button button-secondary two-factor-fido-u2f two-factor-toggle"><?php esc_html_e( 'View Keys' ); ?></button></p>
+					<?php endif; ?>
 				<?php else : ?>
 					<?php if ( Two_Factor_FIDO_U2F::is_browser_support() ) : ?>
 					<input type="hidden" name="do_new_security_key" id="do_new_security_key" />
