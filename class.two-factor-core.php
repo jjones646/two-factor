@@ -644,7 +644,7 @@ class Two_Factor_Core {
 						<label class="screen-reader-text">Select <?php $object->print_label(); ?></label>
 						<input type="hidden" name="checked[]" value="<?php $object->is_available_for_user( $user ); ?>">
 					</th>
-					<td data-colname="Method" class="plugin-title column-method column-primary"><strong><?php $object->print_label(); ?></strong>
+					<td class="plugin-title column-method column-primary"><strong><?php $object->print_label(); ?></strong>
 						<div class="row-actions visible">
 							<?php if ( $object->is_available_for_user( $user ) ) : ?>
 							<span class="<?php esc_html_e( 'deactivate' ); ?>">
@@ -658,7 +658,7 @@ class Two_Factor_Core {
 						</div>
 					</td>
 					
-					<td data-colname="Details" class="column-details desc">
+					<td class="column-details desc">
 						<div class="plugin-description two-factor-column-details">
 						<?php $object->print_description(); ?>
 						</div>
