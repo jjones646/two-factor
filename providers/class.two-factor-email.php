@@ -27,8 +27,9 @@ class Two_Factor_Email extends Two_Factor_Provider {
 	 * @since 0.1-dev
 	 */
 	protected function __construct() {
-		add_action( 'admin_enqueue_scripts',       			array( $this, 'enqueue_assets' ) );
-		add_action( 'two-factor-user-options-' . __CLASS__, array( $this, 'print_user_options' ) );
+		add_action( 'admin_enqueue_scripts',       					array( $this, 'enqueue_assets' ) );
+		add_action( 'two-factor-user-options-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
+		add_action( 'two-factor-user-option-details-' .	__CLASS__, 	array( $this, 'print_user_option_details' ) );
 		return parent::__construct();
 	}
 

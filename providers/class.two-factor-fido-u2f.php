@@ -54,8 +54,9 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 		require_once( TWO_FACTOR_DIR . 'providers/class.two-factor-fido-u2f-admin.php' );
 		Two_Factor_FIDO_U2F_Admin::add_hooks( __CLASS__ );
 
-		add_action( 'login_enqueue_scripts',                array( $this, 'login_enqueue_assets' ) );
-		add_action( 'two-factor-user-options-' . __CLASS__, array( $this, 'print_user_options' ) );
+		add_action( 'login_enqueue_scripts',                		array( $this, 'login_enqueue_assets' ) );
+		add_action( 'two-factor-user-options-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
+		add_action( 'two-factor-user-option-details-' .	__CLASS__, 	array( $this, 'print_user_option_details' ) );
 		return parent::__construct();
 	}
 

@@ -39,10 +39,11 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	 * Class constructor. Sets up hooks, etc.
 	 */
 	protected function __construct() {
-		add_action( 'admin_enqueue_scripts',       			array( $this, 'enqueue_assets' ) );
-		add_action( 'two-factor-user-options-' . __CLASS__, array( $this, 'print_user_options' ) );
-		add_action( 'personal_options_update',              array( $this, 'user_options_update' ) );
-		add_action( 'edit_user_profile_update',             array( $this, 'user_options_update' ) );
+		add_action( 'admin_enqueue_scripts',       					array( $this, 'enqueue_assets' ) );
+		add_action( 'personal_options_update',              		array( $this, 'user_options_update' ) );
+		add_action( 'edit_user_profile_update',             		array( $this, 'user_options_update' ) );
+		add_action( 'two-factor-user-options-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
+		add_action( 'two-factor-user-option-details-' . __CLASS__, 	array( $this, 'print_user_option_details' ) );
 
 		return parent::__construct();
 	}
@@ -102,7 +103,7 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 		if ( ! isset( $user->ID ) ) {
 			return false;
 		}
-		
+
 	}
 
 	/**

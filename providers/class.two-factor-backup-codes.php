@@ -34,10 +34,11 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	 * @since 0.1-dev
 	 */
 	protected function __construct() {
-		add_action( 'admin_enqueue_scripts',       				array( $this, 'enqueue_assets' ) );
-		add_action( 'two-factor-user-options-' . __CLASS__, 	array( $this, 'print_user_options' ) );
-		add_action( 'admin_notices', 							array( $this, 'admin_notices' ) );
-		add_action( 'wp_ajax_two_factor_backup_codes_generate', array( $this, 'ajax_generate_json' ) );
+		add_action( 'admin_enqueue_scripts',       					array( $this, 'enqueue_assets' ) );
+		add_action( 'admin_notices', 								array( $this, 'admin_notices' ) );
+		add_action( 'wp_ajax_two_factor_backup_codes_generate', 	array( $this, 'ajax_generate_json' ) );
+		add_action( 'two-factor-user-options-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
+		add_action( 'two-factor-user-option-details-' .	__CLASS__, 	array( $this, 'print_user_option_details' ) );
 
 		return parent::__construct();
 	}

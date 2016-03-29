@@ -38,7 +38,8 @@ class Two_Factor_FIDO_U2F_Admin {
 		add_action( 'wp_ajax_inline-save-key',     array( __CLASS__, 'wp_ajax_inline_save' ) );
 
 		if ( ! empty( $provider ) ) {
-			add_action( 'two-factor-user-options-' . $provider, array( __CLASS__, 'show_user_profile' ) );
+			add_action( 'two-factor-user-options-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
+			// add_action( 'two-factor-user-option-details-' . __CLASS__, 	array( $this, 'print_user_option_details' ) );
 		}
 	}
 
@@ -97,16 +98,11 @@ class Two_Factor_FIDO_U2F_Admin {
 	/**
 	 * Display the security key section in a users profile.
 	 *
-	 * This executes during the `show_user_security_settings` action.
-	 *
-	 * @since 0.1-dev
-	 *
-	 * @access public
-	 * @static
+	 * @since 0.2-dev
 	 *
 	 * @param WP_User $user WP_User object of the logged-in user.
 	 */
-	public static function show_user_profile( $user ) {
+	public static function print_user_options( $user ) {
 		wp_nonce_field( "user_security_keys-{$user->ID}", '_nonce_user_security_keys' );
 		$new_key = false;
 
