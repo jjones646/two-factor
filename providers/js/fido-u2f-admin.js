@@ -42,16 +42,9 @@
 	});
 
 	$('button.two-factor-toggle.two-factor-fido-u2f').click(function() {
+		var e = $(this).nextUntil('.two-factor-toggle.two-factor-wrap').parent().children('div.two-factor-toggle:last-child');
+		
 		$(this).toggleClass('clicked');
-		var e = $('div.security-keys > div.two-factor-toggle.two-factor-fido-u2f');
-		if ($(this).hasClass('clicked')) {
-			e.parent().parent().children().last().slideUp(125, function(){
-				e.slideDown();
-			});
-		} else {
-			e.slideUp(250, function(){
-				e.parent().parent().children().last().slideDown();
-			});
-		}
+		e.slideToggle();
 	});
 })(jQuery);

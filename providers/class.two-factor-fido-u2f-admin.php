@@ -128,10 +128,10 @@ class Two_Factor_FIDO_U2F_Admin {
 
 		// _e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'two-factor-options', $message ) );
 		?>
-		<div class="security-keys" id="security-keys-section">
+		<div class="security-keys two-factor-fido-u2f two-factor-toggle two-factor-wrap" id="security-keys-section">
 			<div class="register-security-key">
 				<?php if ( ! is_ssl() ) : ?>
-					<p class="description"><?php esc_html_e( 'Security Keys require an https connection.' ); ?></p>
+					<p class="description"><?php esc_html_e( 'Using Security Keys requires an https connection.' ); ?></p>
 					<p><button type="button" class="button button-secondary two-factor-fido-u2f two-factor-toggle "><?php esc_html_e( 'View Keys' ); ?></button></p>
 				<?php else : ?>
 					<?php if ( Two_Factor_FIDO_U2F::is_browser_support() ) : ?>
