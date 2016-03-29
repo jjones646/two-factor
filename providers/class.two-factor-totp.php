@@ -195,7 +195,7 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 			delete_user_meta( get_current_user_id(), self::NOTICES_META_KEY );
 			foreach ( $notices as $class => $messages ) {
 				foreach ( $messages as $msg ) {
-					esc_html_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'notice notice-error', $msg ) );
+					_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', esc_html__( 'notice notice-error' ), esc_html__( $msg ) ) );
 				}
 			}
 		}
