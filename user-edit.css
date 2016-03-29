@@ -3,7 +3,7 @@
 }
 
 .two-factor {
-    width: 80%;
+    width: 75%;
 }
 
 .application-passwords tfoot {
@@ -26,9 +26,9 @@
 }
 
 .two-factor-table .column-method { 
-    width: 15%;
+    width: 18%;
 }
 
 .two-factor-table .column-details { 
-    width: 85%;
+    width: 82%;
 }
