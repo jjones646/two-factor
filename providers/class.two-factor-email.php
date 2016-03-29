@@ -157,7 +157,7 @@ class Two_Factor_Email extends Two_Factor_Provider {
 	}
 
 	/**
-	 * Inserts markup at the end of the user profile field for this provider.
+	 * Inserts any options that extend the method's setup/configurations with user input.
 	 *
 	 * @since 0.2-dev
 	 *
@@ -167,7 +167,10 @@ class Two_Factor_Email extends Two_Factor_Provider {
 		if ( ! isset( $user->ID ) ) {
 			return false;
 		}
-		
+	
+		?>
+		<p><button type="button" class="button button-secondary two-factor-backup-codes two-factor-unregister hide-if-no-js"><?php esc_html_e( 'Disable' ); ?></button></p>
+		<?php
 	}
 
 	/**
@@ -182,8 +185,9 @@ class Two_Factor_Email extends Two_Factor_Provider {
 			return false;
 		}
 
-		$message = sprintf( __( 'Authentication codes will be sent to %1$s.' ), $user->user_email );
-		esc_html_e( sprintf( '<p>%1$s</p>', $message ) );
+		$message = sprintf( __( 'Authentication codes will be sent to %1$s' ), $user->user_email );
+
+		_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'two-factor-details', $message ) );
 	}
 
 	/**

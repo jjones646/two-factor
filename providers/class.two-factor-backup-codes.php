@@ -206,10 +206,9 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 		}
 
 		$count = count( get_user_meta( $user->ID, self::BACKUP_CODES_META_KEY, true ) );
+		$message = sprintf( __( 'You have <strong>%s</strong> unused %s' ), $count, _n( 'code', 'codes', $count ) ) . __( ' remaining' );
 
-		?>
-		<p><?php _e( sprintf( 'You have %u unused ', $count ) . _n( 'code', 'codes', $count ) . ' remaining.' ); ?></p>
-		<?php
+		_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'two-factor-details', $message ) );
 	}
 
 	/**
