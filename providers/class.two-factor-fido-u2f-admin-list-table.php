@@ -94,7 +94,7 @@ class Two_Factor_FIDO_U2F_Admin_List_Table extends WP_List_Table {
 	 * @return array List of CSS classes for the table tag.
 	 */
 	protected function get_table_classes() {
-		return array( 'widefat', $this->_args['plural'] );
+		return array( $this->_args['plural'] );
 	}
 
 	/**
