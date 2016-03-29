@@ -42,10 +42,12 @@
 	});
 
 	$('button.two-factor-toggle.two-factor-fido-u2f').click(function() {
-		var e = $(this).nextUntil('.two-factor-toggle.two-factor-wrap').parent().children('div.two-factor-toggle:last-child');
+		var e = $(this).nextUntil('div.two-factor-toggle.two-factor-wrap').parent();
+
+		// .children('div.two-factor-toggle:last-child');
 		console.log($(this));
 		console.log(e);
 		$(this).toggleClass('clicked');
-		e.slideToggle();
+		// e.slideToggle();
 	});
 })(jQuery);
