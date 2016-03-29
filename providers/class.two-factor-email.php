@@ -202,7 +202,7 @@ class Two_Factor_Email extends Two_Factor_Provider {
 	/**
 	 * Inserts markup at the end of the user profile field for this provider.
 	 *
-	 * @since 0.1-dev
+	 * @since 0.2-dev
 	 *
 	 * @param WP_User $user WP_User object of the logged-in user.
 	 */
@@ -211,5 +211,16 @@ class Two_Factor_Email extends Two_Factor_Provider {
 		?>
 		<p><?php esc_html( sprintf( __( 'Authentication codes will be sent to %1$s.' ), $email ) ); ?></p>
 		<?php
+	}
+
+	/**
+	 * Inserts markup at the end of the user profile field for this provider.
+	 *
+	 * @since 0.2-dev
+	 *
+	 * @param WP_User $user WP_User object of the logged-in user.
+	 */
+	public function print_user_option_details( $user ) {
+
 	}
 }

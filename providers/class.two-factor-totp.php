@@ -84,6 +84,8 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 
 	/**
 	 * Returns the name of the provider.
+	 * 
+	 * @since 0.1-dev
 	 */
 	public function get_label() {
 		return _x( 'Authenticator App', 'Provider Label' );
@@ -91,6 +93,8 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 
 	/**
 	 * Display TOTP options on the user settings page.
+	 *
+	 * @since 0.2-dev
 	 *
 	 * @param WP_User $user The current user being edited.
 	 */
@@ -125,6 +129,17 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 			<p><button type="button" class="button button-secondary two-factor-totp two-factor-unregister"><?php esc_html_e( 'Disable' ); ?></button></p>
 			<?php
 		}
+	}
+
+	/**
+	 * Inserts markup at the end of the user profile field for this provider.
+	 *
+	 * @since 0.2-dev
+	 *
+	 * @param WP_User $user WP_User object of the logged-in user.
+	 */
+	public function print_user_option_details( $user ) {
+
 	}
 
 	/**

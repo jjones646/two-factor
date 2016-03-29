@@ -179,7 +179,7 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 	/**
 	 * Inserts markup at the end of the user profile field for this provider.
 	 *
-	 * @since 0.1-dev
+	 * @since 0.2-dev
 	 *
 	 * @param WP_User $user WP_User object of the logged-in user.
 	 */
@@ -190,6 +190,17 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 		<?php echo esc_html( __( 'You currently have ' . sprintf( __( '%u' ), $num_keys ) . ' Security ' . _n( 'Key', 'Keys', $num_keys ) . ' registered.' ) ); ?>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Inserts markup at the end of the user profile field for this provider.
+	 *
+	 * @since 0.2-dev
+	 *
+	 * @param WP_User $user WP_User object of the logged-in user.
+	 */
+	public function print_user_option_details( $user ) {
+
 	}
 
 	/**
