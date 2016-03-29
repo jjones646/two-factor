@@ -165,6 +165,7 @@ class Two_Factor_FIDO_U2F_Admin {
 				$u2f_list_table->inline_edit();
 			}
 			?>
+			</div>
 		</div>
 		<?php
 	}
