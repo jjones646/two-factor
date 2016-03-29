@@ -159,7 +159,7 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 		}
 
 		$message = $totp_acct;
-		_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'two-factor-details', $message ) );
+		_e( sprintf( '<div class="%1$s"><p><strong>Account Tag:</strong> %2$s</p></div>', 'two-factor-details', $message ) );
 	}
 
 	/**
