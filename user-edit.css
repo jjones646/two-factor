@@ -22,10 +22,7 @@
 
 .two-factor-details {
     font-style: italic;
-}
-
-.two-factor-details p {
-    font-size: 13px;
+    font-size: 13px !important;
 }
 
 .two-factor-table .column-method { 
