@@ -642,10 +642,10 @@ class Two_Factor_Core {
 						<label for="method-<?php echo esc_attr( $class ); ?>"><?php $object->print_label(); ?></a>
 					</td>
 					<td data-colname="Details" class="alignleft">
-						<?php do_action( 'two-factor-user-options-' . $class, $user ); ?>
+						<?php do_action( 'two-factor-user-options-details-' . $class, $user ); ?>
 					</td>
 					<td data-colname="Options" class="">
-						<?php do_action( 'two-factor-user-option-details-' . $class, $user ); ?>
+						<?php do_action( 'two-factor-user-option-' . $class, $user ); ?>
 					</td>
 				</tr>
 			<?php endforeach; ?>

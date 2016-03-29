@@ -113,7 +113,7 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 			$site_name = get_bloginfo( 'name', 'display' );
 			?>
 			<p><button type="button" class="button button-secondary two-factor-totp two-factor-register"><?php esc_html_e( 'Setup Authenticator App' ); ?></button></p>
-			<div id="two-factor-totp-options" class="two-factor-toggle two-factor-totp hide-if-js">
+			<div id="two-factor-totp-options" class="two-factor-register two-factor-totp hide-if-js">
 				<img src="<?php echo esc_url( $this->get_google_qr_code( $site_name . ':' . $user->user_login, $key, $site_name ) ); ?>" id="two-factor-totp-qrcode" />
 				<p><strong><?php echo esc_html( $key ); ?></strong></p>
 				<p><?php esc_html_e( 'Please scan the QR code or use the provided key. Optionally, you can give an authentication code from your app.' ); ?></p>
