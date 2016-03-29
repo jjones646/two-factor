@@ -58,6 +58,22 @@ abstract class Two_Factor_Provider {
 	}
 
 	/**
+	 * Returns a short description about the authentication method.
+	 *
+	 * @since 0.2-dev
+	 */
+	abstract function get_description();
+
+	/**
+	 * Prints the description message for the authentication type.
+	 *
+	 * @since 0.2-dev
+	 */
+	public function print_description() {
+		echo esc_html( $this->get_description() );
+	}
+
+	/**
 	 * Prints the form that prompts the user to authenticate.
 	 *
 	 * @since 0.1-dev

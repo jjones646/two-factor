@@ -74,7 +74,14 @@ class Two_Factor_Email extends Two_Factor_Provider {
 		return _x( 'Email', 'Provider Label' );
 	}
 
-	
+	/**
+	 * Returns a short description about the authentication method.
+	 *
+	 * @since 0.2-dev
+	 */
+	public function get_description() {
+		return _x( 'Receive single-use codes at your account\'s email address.', 'Two-Factor Authentication Method Description' );
+	}
 
 	/**
 	 * Delete all active tokens for a user.

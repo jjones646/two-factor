@@ -125,6 +125,15 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 	}
 
 	/**
+	 * Returns a short description about the authentication method.
+	 *
+	 * @since 0.2-dev
+	 */
+	public function get_description() {
+		return _x( 'Use a hardware device compatible with the U2F protocol for 2-Step authentication during sign-in.', 'Two-Factor Authentication Method Description' );
+	}
+
+	/**
 	 * Prints the form that prompts the user to authenticate.
 	 *
 	 * @since 0.1-dev

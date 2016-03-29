@@ -659,7 +659,8 @@ class Two_Factor_Core {
 						</div>
 					</td>
 					<td data-colname="Details" class="column-description desc">
-						<?php do_action( 'two-factor-user-option-details-' . $class, $user ); ?>
+						<!-- <?php do_action( 'two-factor-user-option-details-' . $class, $user ); ?> -->
+						<?php print_description() ?>
 					</td>
 					<td data-colname="Options" class="column-description desc">
 						<div class="plugin-description">

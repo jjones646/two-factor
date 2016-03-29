@@ -89,6 +89,15 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	}
 
 	/**
+	 * Returns a short description about the authentication method.
+	 *
+	 * @since 0.2-dev
+	 */
+	public function get_description() {
+		return _x( 'Use an Authentication App on your phone that will generate time-synchronized codes for your account.', 'Two-Factor Authentication Method Description' );
+	}
+
+	/**
 	 * Display TOTP options on the user settings page.
 	 *
 	 * @since 0.2-dev
