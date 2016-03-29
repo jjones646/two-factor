@@ -126,7 +126,6 @@ class Two_Factor_FIDO_U2F_Admin {
 			unset( $security_key );
 		}
 
-		// _e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'two-factor-options', $message ) );
 		?>
 		<div class="security-keys two-factor-fido-u2f two-factor-toggle two-factor-wrap" id="security-keys-section">
 			<div class="register-security-key">

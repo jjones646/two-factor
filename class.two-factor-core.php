@@ -629,7 +629,7 @@ class Two_Factor_Core {
 					<td class="manage-column column-cb check-column">
 						<label class="screen-reader-text" for="cb-select-all-1">Select All</label>
 					</td>
-					<th scope="col" class="manage-column column-primary"><?php _e( 'Method' ); ?></th>
+					<th scope="col" class="manage-column column-name column-primary"><?php _e( 'Method' ); ?></th>
 					<th scope="col" class="manage-column column-description"><?php _e( 'Details' ); ?></th>
 				</tr>
 			</thead>
