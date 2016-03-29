@@ -620,31 +620,35 @@ class Two_Factor_Core {
 		<table class="wp-list-table widefat striped two-factor-table">
 			<thead>
 				<tr>
-					<td class="manage-column"><label class="screen-reader-text"><?php _e( 'Enabled' ); ?></label></td>
-					<th scope="col" class="manage-column"><?php _e( 'Method' ); ?></th>
+					<th scope="col" class="manage-column column-primary"><?php _e( 'Method' ); ?></th>
 					<th scope="col" class="manage-column"><?php _e( 'Details' ); ?></th>
-					<th scope="col" class="manage-column"><?php _e( 'Options' ); ?></th>
+					<th scope="col" class="manage-column column-description"><?php _e( 'Options' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
 			<input type="hidden" name="<?php echo esc_attr( self::ENABLED_PROVIDERS_USER_META_KEY ); ?>[]" value="<?php /* Dummy input so $_POST value is passed when no providers are enabled. */ ?>" />
 			<?php foreach ( self::get_providers() as $class => $object ) : ?>
 				<?php if ( $object->is_available_for_user( $user ) ) : ?>
-				<tr class="notice notice-info">
+				<tr class="active">
 				<?php else : ?>
-				<tr class="notice">
+				<tr class="inactive">
 				<?php endif; ?>
-					<th scope="row" class="check-column">
-					<input type="checkbox" id="method-<?php echo esc_attr( $class ); ?>" name="<?php echo esc_attr( self::ENABLED_PROVIDERS_USER_META_KEY ); ?>[]" value="<?php echo esc_attr( $class ); ?>" <?php checked( $object->is_available_for_user( $user ) ); ?>>
-					</th>
-					<td data-colname="Method" class="column-slug">
-						<label for="method-<?php echo esc_attr( $class ); ?>"><?php $object->print_label(); ?></a>
+					<td data-colname="Method" class="plugin-title column-primary"><strong><?php $object->print_label(); ?></strong>
+						<div class="row-actions visible">
+							<?php if ( $object->is_available_for_user( $user ) ) : ?>
+							<span class="<?php esc_html_e( 'deactivate' ); ?>"/>
+							<?php else : ?>
+							<span class="<?php esc_html_e( 'activate' ); ?>"/>
+							<?php endif; ?>
+						</div>
 					</td>
 					<td data-colname="Details" class="alignleft">
 						<?php do_action( 'two-factor-user-option-details-' . $class, $user ); ?>
 					</td>
-					<td data-colname="Options" class="">
+					<td data-colname="Options" class="column-description desc">
+						<div class="plugin-description">
 						<?php do_action( 'two-factor-user-options-' . $class, $user ); ?>
+						</div>
 					</td>
 				</tr>
 			<?php endforeach; ?>
