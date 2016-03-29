@@ -62,7 +62,7 @@ class Two_Factor_Email extends Two_Factor_Provider {
 			return;
 		}
 
-		wp_enqueue_script( 'totp-options', plugins_url( 'js/email-options.js', __FILE__ ), array( 'jquery' ), null, true );
+		wp_enqueue_script( 'email-options', plugins_url( 'js/email-options.js', __FILE__ ), array( 'jquery' ), null, true );
 	}
 
 	/**
