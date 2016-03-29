@@ -131,7 +131,7 @@ class Two_Factor_FIDO_U2F_Admin {
 			<div class="register-security-key">
 				<?php if ( ! is_ssl() ) : ?>
 					<p class="description"><?php esc_html_e( 'Using Security Keys requires an https connection.' ); ?></p>
-					<p><button type="button" class="button button-secondary two-factor-fido-u2f two-factor-toggle "><?php esc_html_e( 'View Keys' ); ?></button></p>
+					<p><button type="button" class="button button-secondary two-factor-fido-u2f two-factor-toggle"><?php esc_html_e( 'View Keys' ); ?></button></p>
 				<?php else : ?>
 					<?php if ( Two_Factor_FIDO_U2F::is_browser_support() ) : ?>
 					<input type="hidden" name="do_new_security_key" id="do_new_security_key" />
@@ -145,7 +145,7 @@ class Two_Factor_FIDO_U2F_Admin {
 
 					<?php else : ?>
 					<p class="description"><?php esc_html_e( 'You are using an unsupported browser. Security Keys are only supported in Chrome 41+. ' ); ?><a href="https://support.google.com/accounts/answer/6103523"><?php esc_html_e( 'More Information' ); ?></a></p>
-
+					<p><button type="button" class="button button-secondary two-factor-fido-u2f two-factor-toggle"><?php esc_html_e( 'View Keys' ); ?></button></p>
 					<?php endif; ?>
 				<?php endif; ?>
 			</div>
@@ -165,7 +165,7 @@ class Two_Factor_FIDO_U2F_Admin {
 				$u2f_list_table->inline_edit();
 			}
 			?>
-		</div>
+			</div>
 		</div>
 		<?php
 	}
