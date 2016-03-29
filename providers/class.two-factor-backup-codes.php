@@ -112,7 +112,7 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	 * @since 0.2-dev
 	 */
 	public function get_description() {
-		return _x( 'Generate ' . self::NUMBER_OF_CODES . 'single-use codes that can be used in emergency situations when all other methods are unavailable.', 'Two-Factor Authentication Method Description' );
+		return _x( 'Generate ' . self::NUMBER_OF_CODES . ' single-use codes that can be used in emergency situations when all other methods are unavailable.', 'Two-Factor Authentication Method Description' );
 	}
 
 	/**
