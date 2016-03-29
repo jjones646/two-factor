@@ -620,6 +620,10 @@ class Two_Factor_Core {
 		<table class="wp-list-table widefat striped two-factor-table">
 			<thead>
 				<tr>
+					<td id="cb" class="manage-column column-cb check-column">
+						<label class="screen-reader-text" for="cb-select-all-1">Select All</label>
+						<!-- <input id="cb-select-all-1" type="checkbox"> -->
+					</td>
 					<th scope="col" class="manage-column column-primary"><?php _e( 'Method' ); ?></th>
 					<th scope="col" class="manage-column"><?php _e( 'Details' ); ?></th>
 					<th scope="col" class="manage-column column-description"><?php _e( 'Options' ); ?></th>
@@ -633,6 +637,10 @@ class Two_Factor_Core {
 				<?php else : ?>
 				<tr class="inactive">
 				<?php endif; ?>
+					<th scope="row" class="check-column">
+						<label class="screen-reader-text" for="">Select <?php $object->print_label(); ?></label>
+						<!-- <input type="checkbox" name="checked[]" value="" id=""> -->
+					</th>
 					<td data-colname="Method" class="plugin-title column-primary"><strong><?php $object->print_label(); ?></strong>
 						<div class="row-actions visible">
 							<?php if ( $object->is_available_for_user( $user ) ) : ?>
