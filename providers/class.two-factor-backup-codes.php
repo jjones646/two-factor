@@ -34,6 +34,8 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	 * @since 0.1-dev
 	 */
 	protected function __construct() {
+		$this->priority = 80;
+
 		add_action( 'admin_enqueue_scripts',       					array( $this, 'enqueue_assets' ) );
 		add_action( 'admin_notices', 								array( $this, 'admin_notices' ) );
 		add_action( 'wp_ajax_two_factor_backup_codes_generate', 	array( $this, 'ajax_generate_json' ) );
@@ -73,22 +75,13 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	}
 
 	/**
-	 * Returns the priority of the provider type.
-	 *
-	 * @since 0.2-dev
-	 */
-	public function get_priority() {
-		return 8;
-	}
-
-	/**
 	 * Displays an admin notice when backup codes have run out.
 	 *
 	 * @since 0.1-dev
 	 */
 	public function admin_notices() {
 		$user = wp_get_current_user();
-
+		
 		// Return if the provider is not enabled.
 		if ( ! in_array( __CLASS__, Two_Factor_Core::get_enabled_providers_for_user( $user->ID ) ) ) {
 			return;
@@ -98,20 +91,10 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 		if ( $this->is_available_for_user( $user ) ) {
 			return;
 		}
-		?>
-		<div class="error">
-			<p>
-				<span>
-					<?php
-					printf( // WPCS: XSS OK.
-						__( 'Two-Factor: You are out of backup codes and need to <a href="%s">generate more.</a>' ),
-						esc_url( get_edit_user_link( $user->ID ) . '#two-factor-backup-codes' )
-					);
-					?>
-				<span>
-			</p>
-		</div>
-		<?php
+
+		$message = sprintf( __( 'Two-Factor: You are out of backup codes and need to <a href="%s">generate more.</a>' ), esc_url( get_edit_user_link( $user->ID ) . '#two-factor-backup-codes' );
+
+		esc_html_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'notice notice-error', $message ) );
 	}
 
 	/**
@@ -309,9 +292,9 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	public function authentication_page( $user ) {
 		require_once( ABSPATH .  '/wp-admin/includes/template.php' );
 		?>
-		<p><?php esc_html_e( 'Enter a single-use backup code.' ); ?></p><br/>
+		<p><?php esc_html_e( 'Enter a single-use backup code.' ); ?></p>
 		<p>
-			<label for="authcode"><?php esc_html_e( 'Verification Code:' ); ?></label>
+			<label for="authcode"><?php esc_html_e( 'Backup Code:' ); ?></label>
 			<input type="tel" name="two-factor-backup-code" id="authcode" class="input" value="" size="20" pattern="[0-9]*" />
 		</p>
 		<?php
@@ -321,12 +304,10 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	/**
 	 * Validates the users input token.
 	 *
-	 * In this class we just return true.
-	 *
 	 * @since 0.1-dev
 	 *
 	 * @param WP_User $user WP_User object of the logged-in user.
-	 * @return boolean
+	 * @return bool   True on success, false on failure.
 	 */
 	public function validate_authentication( $user ) {
 		return $this->validate_code( $user, $_POST['two-factor-backup-code'] );
@@ -335,13 +316,13 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	/**
 	 * Validates a backup code.
 	 *
-	 * Backup Codes are single use and are deleted upon a successful validation.
+	 * Backup Codes are single-use and are deleted upon a successful validation.
 	 *
 	 * @since 0.1-dev
 	 *
 	 * @param WP_User $user WP_User object of the logged-in user.
 	 * @param int     $code The backup code.
-	 * @return boolean
+	 * @return bool   True on success, false on failure.
 	 */
 	public function validate_code( $user, $code ) {
 		$backup_codes = get_user_meta( $user->ID, self::BACKUP_CODES_META_KEY, true );
@@ -349,8 +330,7 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 		if ( is_array( $backup_codes ) && ! empty( $backup_codes ) ) {
 			foreach ( $backup_codes as $code_index => $code_hashed ) {
 				if ( wp_check_password( $code, $code_hashed, $user->ID ) ) {
-					$this->delete_code( $user, $code_hashed );
-					return true;
+					return $this->delete_code( $user, $code_hashed );
 				}
 			}
 		}
@@ -364,6 +344,7 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	 *
 	 * @param WP_User $user WP_User object of the logged-in user.
 	 * @param string  $code_hashed The hashed the backup code.
+	 * @return int|bool Meta ID if the key didn't exist, true on successful update, false on failure.
 	 */
 	public function delete_code( $user, $code_hashed ) {
 		$backup_codes = get_user_meta( $user->ID, self::BACKUP_CODES_META_KEY, true );
@@ -374,25 +355,19 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 		$backup_codes = array_values( array_flip( $backup_codes ) );
 
 		// Update the backup code master list.
-		update_user_meta( $user->ID, self::BACKUP_CODES_META_KEY, $backup_codes );
+		return update_user_meta( $user->ID, self::BACKUP_CODES_META_KEY, $backup_codes );
+		// return delete_user_meta( $user->ID, self::BACKUP_CODES_META_KEY, $backup_codes[ $code_hashed ] );
 	}
 
 	/**
-	 * Removes all backup codes for a user.
+	 * Delete all backup codes for a user.
 	 *
 	 * @since 0.2-dev
 	 *
 	 * @param WP_User $user WP_User object of the logged-in user.
+	 * @return bool True on success, false on failure.
 	 */
 	public function delete_all_codes( $user ) {
-		// $backup_codes = get_user_meta( $user->ID, self::BACKUP_CODES_META_KEY, true );
-		// Update the backup code master list.
-		update_user_meta( $user->ID, self::BACKUP_CODES_META_KEY, array() );
-
-		// if ( is_array( $backup_codes ) && ! empty( $backup_codes ) ) {
-		// 	foreach ( $backup_codes as $code_index => $code_hashed ) {
-		// 			$this->delete_code( $user, $code_hashed );
-		// 	}
-		// }
+		return delete_user_meta( $user->ID, self::BACKUP_CODES_META_KEY );
 	}
 }

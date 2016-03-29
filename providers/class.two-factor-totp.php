@@ -1,8 +1,10 @@
 <?php
+
 // If this file is called directly, abort.
 if ( ! defined( 'ABSPATH' ) ) {
 	die;
 }
+
 /**
  * Class for creating a Time-based One-time Password provider.
  *
@@ -39,7 +41,10 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	 * Class constructor. Sets up hooks, etc.
 	 */
 	protected function __construct() {
+		$this->priority = 40;
+
 		add_action( 'admin_enqueue_scripts',       					array( $this, 'enqueue_assets' ) );
+		add_action( 'admin_notices', 								array( $this, 'admin_notices' ) );
 		add_action( 'personal_options_update',              		array( $this, 'user_options_update' ) );
 		add_action( 'edit_user_profile_update',             		array( $this, 'user_options_update' ) );
 		add_action( 'two-factor-user-options-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
@@ -75,15 +80,6 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	}
 
 	/**
-	 * Returns the priority of the provider type.
-	 *
-	 * @since 0.2-dev
-	 */
-	public function get_priority() {
-		return 4;
-	}
-
-	/**
 	 * Returns the name of the provider.
 	 * 
 	 * @since 0.1-dev
@@ -106,7 +102,7 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 
 		wp_nonce_field( 'user_two_factor_totp_options', '_nonce_user_two_factor_totp_options', false );
 		$key = get_user_meta( $user->ID, self::SECRET_META_KEY, true );
-		$this->admin_notices();
+		// $this->admin_notices();
 
 		if ( empty( $key ) ) {
 			$key = $this->generate_key();
@@ -143,26 +139,23 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 			return false;
 		}
 
+		$message = sprintf( __( '%s' ), $this->get_label() ) . ' is ';
+
 		if ( empty( $key ) ) {
-			?>
-			<p>
-			<?php echo esc_html( __( sprintf( __( '%u' ), $this->get_label() ) . ' is disabled.' ) ); ?>
-			</p>
-			<?php
+			$message .= 'disabled';
 		} else {
-			?>
-			<p>
-			<?php echo esc_html( __( sprintf( __( '%u' ), $this->get_label() ) . ' is enabled.' ) ); ?>
-			</p>
-			<?php
+			$message .= 'enabled';
 		}
 		
+		esc_html_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'two-factor-details', $message ) );
 	}
 
 	/**
 	 * Save the options specified in `::print_user_options()`
+	 * 
+	 * @since 0.1-dev
 	 *
-	 * @param integer $user_id The user ID whose options are being updated.
+	 * @param int $user_id The user ID whose options are being updated.
 	 */
 	public function user_options_update( $user_id ) {
 		if ( isset( $_POST['_nonce_user_two_factor_totp_options'] ) ) {
@@ -201,19 +194,9 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 		if ( ! empty( $notices ) ) {
 			delete_user_meta( get_current_user_id(), self::NOTICES_META_KEY );
 			foreach ( $notices as $class => $messages ) {
-				?>
-				<div class="<?php echo esc_attr( $class ) ?>">
-					<?php
-					foreach ( $messages as $msg ) {
-						?>
-						<p>
-							<span><?php echo esc_html( $msg ); ?><span>
-						</p>
-						<?php
-					}
-					?>
-				</div>
-				<?php
+				foreach ( $messages as $msg ) {
+					esc_html_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'notice notice-error', $msg ) );
+				}
 			}
 		}
 	}

@@ -15,6 +15,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class Two_Factor_Provider {
 
 	/**
+	 * The priority any derived method. Derived classes must set this in their constructor.
+	 *
+	 * @type int
+	 */
+	protected $priority = 100;
+
+	/**
 	 * Class constructor.
 	 *
 	 * @since 0.1-dev
@@ -29,7 +36,7 @@ abstract class Two_Factor_Provider {
 	 * @since 0.2-dev
 	 */
 	public function get_priority() {
-		return 100;
+		return $this->priority;
 	}
 
 	/**

@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 
 	/**
-	 * U2F Library
+	 * The U2F library interface object.
 	 *
 	 * @var u2flib_server\U2F
 	 */
@@ -41,6 +41,8 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 	 * @since 0.1-dev
 	 */
 	protected function __construct() {
+		$this->priority = 20;
+
 		if ( version_compare( PHP_VERSION, '5.3.0', '<' ) ) {
 			return;
 		}
@@ -54,9 +56,11 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 		require_once( TWO_FACTOR_DIR . 'providers/class.two-factor-fido-u2f-admin.php' );
 		Two_Factor_FIDO_U2F_Admin::add_hooks( __CLASS__ );
 
+		add_action( 'admin_notices', 								array( $this, 'admin_notices' ) );
 		add_action( 'login_enqueue_scripts',                		array( $this, 'login_enqueue_assets' ) );
 		add_action( 'two-factor-user-options-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
 		add_action( 'two-factor-user-option-details-' .	__CLASS__, 	array( $this, 'print_user_option_details' ) );
+
 		return parent::__construct();
 	}
 
@@ -75,6 +79,29 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 	}
 
 	/**
+	 * Displays an admin notice when email is disabled and no other two-factor methods are available.
+	 *
+	 * @since 0.2-dev
+	 */
+	public function admin_notices() {
+		$user = wp_get_current_user();
+		
+		// Return if the provider is not enabled.
+		if ( ! in_array( __CLASS__, Two_Factor_Core::get_enabled_providers_for_user( $user->ID ) ) ) {
+			return;
+		}
+
+		// Return if not available for user.
+		if ( $this->is_available_for_user( $user ) ) {
+			return;
+		}
+
+		$message = __( 'Testing from admin_notices, fido-u2f' );
+
+		esc_html_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'notice notice-error', $message ) );
+	}
+
+	/**
 	 * Enqueue assets for login form.
 	 *
 	 * @since 0.1-dev
@@ -86,15 +113,6 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 
 		wp_enqueue_script( 'u2f-api',        plugins_url( 'includes/Google/u2f-api.js', dirname( __FILE__ ) ), null, null, true );
 		wp_enqueue_script( 'fido-u2f-login', plugins_url( 'js/fido-u2f-login.js', __FILE__ ), array( 'jquery', 'u2f-api' ), null, true );
-	}
-
-	/**
-	 * Returns the priority of the provider type.
-	 *
-	 * @since 0.2-dev
-	 */
-	public function get_priority() {
-		return 2;
 	}
 
 	/**
@@ -213,24 +231,17 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 	/**
 	 * Check if a given variable is a security key
 	 *
-	 * @since 0.1-dev+
+	 * @since 0.2-dev
 	 *
 	 * @param object $key The data of registered security key.
 	 * @return bool True if valid security key object, false otherwise.
 	 */
 	public static function is_security_key( $key ) {
-		if (
-			! is_object( $key )
-				|| ! property_exists( $key, 'keyHandle' ) || empty( $key->keyHandle )
-				|| ! property_exists( $key, 'publicKey' ) || empty( $key->publicKey )
-				|| ! property_exists( $key, 'certificate' ) || empty( $key->certificate )
-				|| ! property_exists( $key, 'counter' ) || ( -1 > $key->counter )
-		) {
-			return false;
-		}
-		else {
-			return true;
-		}
+		return ! ( ! is_object( $key )
+			|| ! property_exists( $key, 'keyHandle' ) || empty( $key->keyHandle )
+			|| ! property_exists( $key, 'publicKey' ) || empty( $key->publicKey )
+			|| ! property_exists( $key, 'certificate' ) || empty( $key->certificate )
+			|| ! property_exists( $key, 'counter' ) || ( -1 > $key->counter ) );
 	}
 
 	/**
