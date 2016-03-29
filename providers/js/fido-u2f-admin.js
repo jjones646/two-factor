@@ -32,11 +32,9 @@
 				$('<form>')[0].submit.call($('#your-profile')[0]);
 			});
 		}, $(this)), 1000);
-		console.log($(this));
 	});
 
 	$('button.two-factor-toggle.two-factor').click(function() {
-		console.log($(this));
 		$(this).prop('disabled', true);
 		$('td > .two-factor-toggle').slideUp(125, function() {
 			$('td > div.two-factor-toggle').slideDown();
