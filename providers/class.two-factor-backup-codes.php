@@ -205,6 +205,8 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 			return false;
 		}
 
+		$count = count( get_user_meta( $user->ID, self::BACKUP_CODES_META_KEY, true ) );
+
 		?>
 		<p><?php _e( sprintf( 'You have %u unused ', $count ) . _n( 'code', 'codes', $count ) . ' remaining.' ); ?></p>
 		<?php
