@@ -3,15 +3,7 @@
 }
 
 .two-factor {
-
-}
-
-/*.two-factor-table .wp-list-table {
-	width: 70%;
-}*/
-
-#two-factor-profile-option {
-
+    width: 80%;
 }
 
 .application-passwords tfoot {
@@ -30,16 +22,13 @@
 
 .two-factor-details {
     font-style: italic;
+    font-size: 13px;
 }
 
 .two-factor-table .column-method { 
-    width: 20%;
+    width: 15%;
 }
 
 .two-factor-table .column-details { 
-    width: 80%;
+    width: 85%;
 }
-
-/*.two-factor-verification .two-factor-introduction {
-	margin-bottom:1em;
-}*/
