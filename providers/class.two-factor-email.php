@@ -207,10 +207,10 @@ class Two_Factor_Email extends Two_Factor_Provider {
 	 * @param WP_User $user WP_User object of the logged-in user.
 	 */
 	public function print_user_options( $user ) {
-		$email = $user->user_email;
-		?>
-		<p><?php esc_html( sprintf( __( 'Authentication codes will be sent to %1$s.' ), $email ) ); ?></p>
-		<?php
+		if ( ! isset( $user->ID ) ) {
+			return false;
+		}
+		
 	}
 
 	/**
@@ -221,6 +221,13 @@ class Two_Factor_Email extends Two_Factor_Provider {
 	 * @param WP_User $user WP_User object of the logged-in user.
 	 */
 	public function print_user_option_details( $user ) {
+		if ( ! isset( $user->ID ) ) {
+			return false;
+		}
+		$email = $user->user_email;
 
+		?>
+		<p><?php esc_html( sprintf( __( 'Authentication codes will be sent to %1$s.' ), $email ) ); ?></p>
+		<?php
 	}
 }

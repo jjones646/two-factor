@@ -102,6 +102,20 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 		if ( ! isset( $user->ID ) ) {
 			return false;
 		}
+		
+	}
+
+	/**
+	 * Inserts markup at the end of the user profile field for this provider.
+	 *
+	 * @since 0.2-dev
+	 *
+	 * @param WP_User $user WP_User object of the logged-in user.
+	 */
+	public function print_user_option_details( $user ) {
+		if ( ! isset( $user->ID ) ) {
+			return false;
+		}
 
 		wp_nonce_field( 'user_two_factor_totp_options', '_nonce_user_two_factor_totp_options', false );
 		$key = get_user_meta( $user->ID, self::SECRET_META_KEY, true );
@@ -129,17 +143,6 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 			<p><button type="button" class="button button-secondary two-factor-totp two-factor-unregister"><?php esc_html_e( 'Disable' ); ?></button></p>
 			<?php
 		}
-	}
-
-	/**
-	 * Inserts markup at the end of the user profile field for this provider.
-	 *
-	 * @since 0.2-dev
-	 *
-	 * @param WP_User $user WP_User object of the logged-in user.
-	 */
-	public function print_user_option_details( $user ) {
-
 	}
 
 	/**
