@@ -63,10 +63,10 @@ class Two_Factor_Core {
 	public static function get_providers() {
 		$provider_priority = array();
 		$providers = array(
-			'Two_Factor_Email'        => TWO_FACTOR_DIR . 'providers/class.two-factor-email.php',
-			'Two_Factor_Totp'         => TWO_FACTOR_DIR . 'providers/class.two-factor-totp.php',
-			'Two_Factor_FIDO_U2F'     => TWO_FACTOR_DIR . 'providers/class.two-factor-fido-u2f.php',
-			'Two_Factor_Backup_Codes' => TWO_FACTOR_DIR . 'providers/class.two-factor-backup-codes.php',
+			'Two_Factor_Email'        => TWO_FACTOR_DIR . 'providers/class-two-factor-email.php',
+			'Two_Factor_Totp'         => TWO_FACTOR_DIR . 'providers/class-two-factor-totp.php',
+			'Two_Factor_FIDO_U2F'     => TWO_FACTOR_DIR . 'providers/class-two-factor-fido-u2f.php',
+			'Two_Factor_Backup_Codes' => TWO_FACTOR_DIR . 'providers/class-two-factor-backup-codes.php',
 		);
 
 		// FIDO U2F is PHP 5.3+ only.

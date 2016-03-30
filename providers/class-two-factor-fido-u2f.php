@@ -53,7 +53,7 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 		require_once( TWO_FACTOR_DIR . 'vendor/autoload.php' );
 		self::$u2f = new u2flib_server\U2F( $app_url );
 
-		require_once( TWO_FACTOR_DIR . 'providers/class.two-factor-fido-u2f-admin.php' );
+		require_once( TWO_FACTOR_DIR . 'providers/class-two-factor-fido-u2f-admin.php' );
 		Two_Factor_FIDO_U2F_Admin::add_hooks( __CLASS__ );
 
 		add_action( 'admin_notices', 								array( $this, 'admin_notices' ) );
