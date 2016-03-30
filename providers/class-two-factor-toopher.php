@@ -14,21 +14,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Class Two_Factor_Totp
  */
-class Two_Factor_Totp extends Two_Factor_Provider {
+class Two_Factor_Toopher extends Two_Factor_Provider {
 
 	/**
 	 * The user meta token key.
 	 *
 	 * @var string
 	 */
-	const SECRET_META_KEY = '_two_factor_totp_key';
+	const SECRET_META_KEY = '_two_factor_toopher_key';
 
 	/**
 	 * The user meta token key.
 	 *
 	 * @var string
 	 */
-	const NOTICES_META_KEY = '_two_factor_totp_notices';
+	const NOTICES_META_KEY = '_two_factor_toopher_notices';
 
 	const DEFAULT_KEY_BIT_SIZE = 160;
 	const DEFAULT_CRYPTO = 'sha1';
@@ -41,7 +41,7 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	 * Class constructor. Sets up hooks, etc.
 	 */
 	protected function __construct() {
-		$this->priority = 40;
+		$this->priority = 35;
 
 		add_action( 'admin_enqueue_scripts',       					array( $this, 'enqueue_assets' ) );
 		add_action( 'admin_notices', 								array( $this, 'admin_notices' ) );
