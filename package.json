@@ -1,12 +1,12 @@
 {
 	"name": "two-factor",
 	"title": "Two Factor",
-	"homepage": "https://github.com/georgestephanis/two-factor",
+	"homepage": "https://github.com/jjones646/two-factor",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/georgestephanis/two-factor.git"
+		"url": "https://github.com/jjones646/two-factor.git"
 	},
-	"author": "georgestephanis",
+	"author": "jjones646",
 	"license": "GPL-2.0+",
 	"devDependencies": {
 		"grunt": "~0.4.5",

@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: Two Factor
- * Plugin URI: http://github.com/georgestephanis/two-factor/
+ * Plugin URI: http://github.com/jjones646/two-factor
  * Description: A prototype extensible core to enable Two-Factor Authentication.
- * Author: George Stephanis
- * Version: 0.1.1-dev
- * Author URI: http://stephanis.info
+ * Author: Jonathan Jones
+ * Version: 0.2-dev
+ * Author URI: https://github.com/jjones646
  * Network: True
  */
 
