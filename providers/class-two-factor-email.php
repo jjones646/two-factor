@@ -83,6 +83,10 @@ class Two_Factor_Email extends Two_Factor_Provider {
 		return _x( 'Receive single-use codes at your account\'s email address.', 'Two-Factor Authentication Method Description' );
 	}
 
+	public function is_enabled() {
+		return true;
+	}
+
 	/**
 	 * Delete all active tokens for a user.
 	 *

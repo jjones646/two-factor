@@ -115,6 +115,10 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 		return _x( 'Generate ' . self::NUMBER_OF_CODES . ' single-use codes that can be used in emergency situations when all other methods are unavailable.', 'Two-Factor Authentication Method Description' );
 	}
 
+	public function is_enabled() {
+		return true;
+	}
+
 	/**
 	 * Whether this Two Factor provider is configured and codes are available for the user specified.
 	 *
@@ -145,13 +149,6 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 		$ajax_nonce = wp_create_nonce( 'two-factor-backup-codes-generate-json-' . $user->ID );
 		$count = self::codes_remaining_for_user( $user );
 		?>
-		<p id="two-factor-backup-codes">
-		<?php if ( $count ) : ?>
-			<p><button type="button" class="button button-secondary two-factor-backup-codes two-factor-unregister hide-if-no-js"><?php esc_html_e( 'Delete Codes' ); ?></button></p>
-		<?php else : ?>
-			<p><button type="button" class="button button-secondary button-two-factor-backup-codes-generate two-factor-backup-codes two-factor-register hide-if-no-js"><?php esc_html_e( 'Generate Backup Codes' ); ?></button></p>
-		<?php endif; ?>
-		</p>
 		<div class="two-factor-backup-codes-wrapper hide-if-js">
 			<ol class="two-factor-backup-codes-unused-codes"></ol>
 			<p class="description"><?php esc_html_e( 'Store these codes in a secure location. You will not be able to view these codes again.' ); ?></p>

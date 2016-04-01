@@ -65,17 +65,19 @@ class Two_Factor_Core {
 		$providers = array(
 			'Two_Factor_Email'        => TWO_FACTOR_DIR . 'providers/class-two-factor-email.php',
 			'Two_Factor_Totp'         => TWO_FACTOR_DIR . 'providers/class-two-factor-totp.php',
+			'Two_Factor_Duo_Security' => TWO_FACTOR_DIR . 'providers/class-two-factor-duo-security.php',
+			'Two_Factor_Toopher' 	  => TWO_FACTOR_DIR . 'providers/class-two-factor-toopher.php',
 			'Two_Factor_FIDO_U2F'     => TWO_FACTOR_DIR . 'providers/class-two-factor-fido-u2f.php',
 			'Two_Factor_Backup_Codes' => TWO_FACTOR_DIR . 'providers/class-two-factor-backup-codes.php',
 		);
 
 		// FIDO U2F is PHP 5.3+ only.
 		if ( version_compare( PHP_VERSION, '5.3.0', '<' ) ) {
-			unset( $providers['Two_Factor_FIDO_U2F'] );
-			trigger_error( sprintf( // WPCS: XSS OK.
-				__( 'FIDO U2F is not available because you are using PHP %s. (Requires 5.3 or greater)' ),
-				PHP_VERSION
-			) );
+		       unset( $providers['Two_Factor_FIDO_U2F'] );
+		       trigger_error( sprintf( // WPCS: XSS OK.
+		               __( 'FIDO U2F is not available because you are using PHP %s. (Requires 5.3 or greater)' ),
+		               PHP_VERSION
+		       ) );
 		}
 
 		/**
@@ -324,7 +326,7 @@ class Two_Factor_Core {
 
 		if ( ! function_exists( 'login_header' ) ) {
 			// We really should migrate login_header() out of `wp-login.php` so it can be called from an includes file.
-			include_once( TWO_FACTOR_DIR . 'includes/function-login-header.php' );
+			include_once( TWO_FACTOR_DIR . 'providers/includes/function-login-header.php' );
 		}
 
 		login_header();
@@ -586,7 +588,7 @@ class Two_Factor_Core {
 	 * @param WP_User $user WP_User object of the logged-in user.
 	 */
 	public static function user_two_factor_options( $user ) {
-		wp_enqueue_style( 'user-edit-2fa', plugins_url( 'user-edit.css', __FILE__ ) );
+		wp_enqueue_style( 'user-edit-2fa', plugins_url( 'providers/css/user-edit.css', __FILE__ ) );
 		$enabled_providers = get_user_meta( $user->ID, self::ENABLED_PROVIDERS_USER_META_KEY, true );
 
 		?>
@@ -633,7 +635,7 @@ class Two_Factor_Core {
 					<th scope="col" class="manage-column column-details"><?php _e( 'Details' ); ?></th>
 				</tr>
 			</thead>
-			<tbody>
+			<tbody id="the-list">
 			<?php foreach ( self::get_providers() as $class => $object ) : ?>
 				<?php if ( $object->is_available_for_user( $user ) ) : ?>
 				<tr class="active">
@@ -644,15 +646,31 @@ class Two_Factor_Core {
 						<label class="screen-reader-text">Select <?php $object->print_label(); ?></label>
 						<input type="hidden" name="checked[]" value="<?php $object->is_available_for_user( $user ); ?>">
 					</th>
-					<td class="plugin-title column-method column-primary"><strong><?php $object->print_label(); ?></strong>
+					<td class="plugin-title column-primary"><strong><?php $object->print_label(); ?></strong>
 						<div class="row-actions visible">
-							<?php if ( $object->is_available_for_user( $user ) ) : ?>
+							<?php if ( $object->is_enabled( $user ) ) : ?>
 							<span class="<?php esc_html_e( 'deactivate' ); ?>">
 							<a href="#" aria-label="Deactivate <?php $object->print_label(); ?>">Deactivate</a>
 							</span>
 							<?php else : ?>
 							<span class="<?php esc_html_e( 'activate' ); ?>">
 							<a href="#" aria-label="Activate <?php $object->print_label(); ?>">Activate</a>
+							</span>
+							<?php endif; ?>
+							<?php
+
+							if ( $object->is_enabled( $user ) ) {
+								_e( ' | ' );
+							}
+							
+							?>
+							<?php if ( $object->is_available_for_user( $user ) ) : ?>
+							<span class="<?php esc_html_e( 'delete' ); ?>">
+							<a href="#" aria-label="Remove Data <?php $object->print_label(); ?>">Remove Data</a>
+							</span>
+							<?php else : ?>
+							<span class="<?php esc_html_e( 'setup' ); ?>">
+							<a href="#" aria-label="Setup <?php $object->print_label(); ?>">Setup</a>
 							</span>
 							<?php endif; ?>
 						</div>

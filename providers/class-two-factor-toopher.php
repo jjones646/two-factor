@@ -76,7 +76,7 @@ class Two_Factor_Toopher extends Two_Factor_Provider {
 			return;
 		}
 
-		wp_enqueue_script( 'totp-options', plugins_url( 'js/totp-options.js', __FILE__ ), array( 'jquery' ), null, true );
+		// wp_enqueue_script( 'toopher-options', plugins_url( 'js/toopher-options.js', __FILE__ ), array( 'jquery' ), null, true );
 	}
 
 	/**
@@ -85,7 +85,7 @@ class Two_Factor_Toopher extends Two_Factor_Provider {
 	 * @since 0.1-dev
 	 */
 	public function get_label() {
-		return _x( 'Authenticator App', 'Provider Label' );
+		return _x( 'Toopher', 'Provider Label' );
 	}
 
 	/**
@@ -94,7 +94,11 @@ class Two_Factor_Toopher extends Two_Factor_Provider {
 	 * @since 0.2-dev
 	 */
 	public function get_description() {
-		return _x( 'Use an Authentication App on your phone that will generate time-synchronized codes for your account.', 'Two-Factor Authentication Method Description' );
+		return _x( 'Use Toopher to receive push notifications to your phone.', 'Two-Factor Authentication Method Description' );
+	}
+
+	public function is_enabled() {
+		return true;
 	}
 
 	/**
@@ -116,7 +120,6 @@ class Two_Factor_Toopher extends Two_Factor_Provider {
 			$key = $this->generate_key();
 			$site_name = get_bloginfo( 'name', 'display' );
 			?>
-			<p><button type="button" class="button button-secondary two-factor-totp two-factor-register"><?php esc_html_e( 'Setup App' ); ?></button></p>
 			<div id="two-factor-totp-options" class="two-factor-register two-factor-totp hide-if-js">
 				<img src="<?php echo esc_url( $this->get_google_qr_code( $site_name . ':' . $user->user_login, $key, $site_name ) ); ?>" id="two-factor-totp-qrcode" />
 				<p><strong><?php echo esc_html( $key ); ?></strong></p>
@@ -127,10 +130,6 @@ class Two_Factor_Toopher extends Two_Factor_Provider {
 					<input type="tel" name="two-factor-totp-authcode" id="two-factor-totp-authcode" class="input" value="" size="20" pattern="[0-9]*" />
 				</p>
 			</div>
-			<?php
-		} else {
-			?>
-			<p><button type="button" class="button button-secondary two-factor-totp two-factor-unregister"><?php esc_html_e( 'Delete App Key' ); ?></button></p>
 			<?php
 		}
 	}

@@ -107,7 +107,7 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 	 * @since 0.1-dev
 	 */
 	public function login_enqueue_assets() {
-		wp_enqueue_script( 'u2f-api',        plugins_url( 'includes/Google/u2f-api.js', dirname( __FILE__ ) ), null, null, true );
+		wp_enqueue_script( 'u2f-api',        plugins_url( 'includes/Google/u2f-api.js', __FILE__ ), null, null, true );
 		wp_enqueue_script( 'fido-u2f-login', plugins_url( 'js/fido-u2f-login.js', __FILE__ ), array( 'jquery', 'u2f-api' ), null, true );
 	}
 
@@ -127,6 +127,10 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 	 */
 	public function get_description() {
 		return _x( 'Use a hardware device compatible with the U2F protocol for 2-Step authentication during sign-in.', 'Two-Factor Authentication Method Description' );
+	}
+
+	public function is_enabled() {
+		return true;
 	}
 
 	/**

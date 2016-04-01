@@ -6,6 +6,12 @@
     width: 75%;
 }
 
+@media screen and (max-width: 782px) {
+    .two-factor {
+        width: 100%;
+    }
+}
+
 .application-passwords tfoot {
 	display: none;
 }
@@ -20,9 +26,9 @@
 	margin: 1em 0;
 }
 
-/*.two-factor-details {
-    font-style: italic;
-}*/
+.form-table .two-factor-table th {
+    font-weight: initial;   
+}
 
 div.two-factor-details > p {
     font-size: 13px !important;
@@ -32,10 +38,15 @@ div.two-factor-details > p {
     width: 18%;
 }
 
-.two-factor-table .column-details { 
+.two-factor-table .column-details {
     width: 82%;
 }
 
 .two-factor-column-details {
     font-style: italic;
+    margin-bottom: .2em;
+}
+
+span.setup a {
+    color: #5BA23F;
 }
