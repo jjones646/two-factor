@@ -719,7 +719,6 @@ class Two_Factor {
 							<?php endif; ?>
 						</div>
 					</td>
-					
 					<td class="column-details desc">
 						<div class="plugin-description two-factor-column-details">
 						<?php $object->print_description(); ?>
@@ -733,7 +732,6 @@ class Two_Factor {
 			<?php endforeach; ?>
 			</tbody>
 		</table>
-
 		</div>
 		</td></tr>
 		</table>
@@ -842,8 +840,6 @@ class Two_Factor {
 		);
 
 		register_setting( 'general', self::ENABLED_PROVIDERS_KEY );
-		// settings_fields( self::ENABLED_PROVIDERS_KEY );
-		// delete_option( self::ENABLED_PROVIDERS_KEY );
 	}
 
 	/**
@@ -870,37 +866,4 @@ class Two_Factor {
 	public static function deactivate_hook() {
 		unregister_setting( 'general', self::ENABLED_PROVIDERS_KEY );
 	}
-
-	/**
-	 * Update the global enabled/disabled providers.
-	 *
-	 * @since 0.2-dev
-	 */
-	// public static function refresh_update_info() {
-	// 	global $pagenow;
-
-	// 	if ( ! ( 'options.php' === $pagenow  ) ) {
-	// 		return;
-	// 	}
-
-	// 	if ( ! isset( $_POST[ 'submit' ] ) ) {
-	// 		return;
-	// 	}
-
-	// 	if ( ! isset( $_POST[ self::ENABLED_PROVIDERS_KEY ] ) ) {
-	// 		return;
-	// 	}
-
-	// 	$submitted_providers = $_POST[ self::ENABLED_PROVIDERS_KEY ];
-
-	// 	$valid_providers = array_filter( self::get_providers(), function ( $p ) use ( $submitted_providers ) {
-	// 		$pname = $p[ 'name_strict' ];
-	// 		return ( array_key_exists( $pname, $submitted_providers ) && $submitted_providers[ $pname ] === '1' );
-	// 	} );
-	// 	$new_providers = array_values( array_map( function($p) { return $p['name_strict']; }, $valid_providers ) );
-
-	// 	// $success = update_option( self::ENABLED_PROVIDERS_KEY,  $new_providers );
-
-	// 	// wp_die( var_dump( $new_providers ) );
-	// }
 }
