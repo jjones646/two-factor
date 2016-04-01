@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: Two Factor
+ * Plugin Name: Two-Factor
  * Plugin URI: http://github.com/jjones646/two-factor
- * Description: A prototype extensible core to enable Two-Factor Authentication.
+ * Description: Two-Factor Authentication all in one place.
  * Author: Jonathan Jones
  * Version: 0.2-dev
  * Author URI: https://github.com/jjones646
