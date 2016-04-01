@@ -29,7 +29,7 @@ class Tests_Two_factor extends WP_UnitTestCase {
 	function test_classes_exist() {
 
 		$this->assertTrue( class_exists( 'Two_Factor_Provider' ) );
-		$this->assertTrue( class_exists( 'Two_Factor_Core' ) );
+		$this->assertTrue( class_exists( 'Two_Factor' ) );
 
 	}
 }

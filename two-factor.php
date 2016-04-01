@@ -25,7 +25,7 @@ require_once( TWO_FACTOR_DIR . 'providers/class-two-factor-provider.php' );
 /**
  * Include the core that handles the common bits.
  */
-require_once( TWO_FACTOR_DIR . 'class-two-factor-core.php' );
-Two_Factor_Core::add_hooks();
+require_once( TWO_FACTOR_DIR . 'class-two-factor.php' );
+Two_Factor::add_hooks();
 
 

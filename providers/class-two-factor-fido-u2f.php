@@ -85,7 +85,7 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 		$user = wp_get_current_user();
 		
 		// Return if the provider is not enabled.
-		if ( ! in_array( __CLASS__, Two_Factor_Core::get_enabled_providers_for_user( $user->ID ) ) ) {
+		if ( ! in_array( __CLASS__, Two_Factor::get_enabled_providers_for_user( $user->ID ) ) ) {
 			return;
 		}
 
