@@ -1,9 +1,7 @@
 <?php
 
 // If this file is called directly, abort.
-if ( ! defined( 'ABSPATH' ) ) {
-	die;
-}
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
  * Abstract class for creating two factor authentication providers.

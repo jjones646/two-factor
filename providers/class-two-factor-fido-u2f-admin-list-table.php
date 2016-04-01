@@ -1,9 +1,7 @@
 <?php
 
 // If this file is called directly, abort.
-if ( ! defined( 'ABSPATH' ) ) {
-	die;
-}
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 // Load the parent class if it doesn't exist.
 if ( ! class_exists( 'WP_List_Table' ) ) {
