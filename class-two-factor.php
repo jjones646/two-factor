@@ -3,6 +3,8 @@
 // If this file is called directly, abort.
 if ( ! defined( 'ABSPATH' ) ) exit;
 
+// add_action( 'all', create_function( '', 'var_dump( current_filter() );' ) );
+
 /**
  * Class for creating two factor authorization.
  *
@@ -11,6 +13,13 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * @package Two_Factor
  */
 class Two_Factor {
+
+	/**
+	 * The user meta provider key.
+	 *
+	 * @type string
+	 */
+	const ENABLED_PROVIDERS_KEY = 'two_factor_enabled_providers';
 
 	/**
 	 * The user meta provider key.
@@ -39,15 +48,30 @@ class Two_Factor {
 	 * @since 0.1-dev
 	 */
 	public static function add_hooks() {
+		register_activation_hook( __FILE__, 	  array( __CLASS__, 'activation_hook' ) );
+
+		register_deactivation_hook( __FILE__, 	  array( __CLASS__, 'deactivate_hook' ) );
+
 		add_action( 'init',                       array( __CLASS__, 'get_providers' ) );
+
 		add_action( 'wp_login',                   array( __CLASS__, 'wp_login' ), 10, 2 );
+
 		add_action( 'login_form_validate_2fa',    array( __CLASS__, 'login_form_validate_2fa' ) );
+
 		add_action( 'login_form_backup_2fa',      array( __CLASS__, 'backup_2fa' ) );
+
+		add_action( 'admin_init', 				  array( __CLASS__, 'add_settings_general' ) );
+
 		add_action( 'show_user_profile',          array( __CLASS__, 'user_two_factor_options' ) );
+
 		add_action( 'edit_user_profile',          array( __CLASS__, 'user_two_factor_options' ) );
+
 		add_action( 'personal_options_update',    array( __CLASS__, 'user_two_factor_options_update' ) );
+
 		add_action( 'edit_user_profile_update',   array( __CLASS__, 'user_two_factor_options_update' ) );
+
 		add_filter( 'manage_users_columns',       array( __CLASS__, 'filter_manage_users_columns' ) );
+
 		add_filter( 'manage_users_custom_column', array( __CLASS__, 'manage_users_custom_column' ), 10, 3 );
 	}
 
@@ -56,26 +80,25 @@ class Two_Factor {
 	 *
 	 * @since 0.1-dev
 	 *
-	 * @return array
+	 * @return array of data structures for each available provider
 	 */
 	public static function get_providers() {
-		$provider_priority = array();
 		$providers = array(
 			'Two_Factor_Email'        => TWO_FACTOR_DIR . 'providers/class-two-factor-email.php',
 			'Two_Factor_Totp'         => TWO_FACTOR_DIR . 'providers/class-two-factor-totp.php',
-			'Two_Factor_Duo_Security' => TWO_FACTOR_DIR . 'providers/class-two-factor-duo-security.php',
-			'Two_Factor_Toopher' 	  => TWO_FACTOR_DIR . 'providers/class-two-factor-toopher.php',
 			'Two_Factor_FIDO_U2F'     => TWO_FACTOR_DIR . 'providers/class-two-factor-fido-u2f.php',
 			'Two_Factor_Backup_Codes' => TWO_FACTOR_DIR . 'providers/class-two-factor-backup-codes.php',
+			// 'Two_Factor_Duo_Security' => TWO_FACTOR_DIR . 'providers/class-two-factor-duo-security.php',
+			// 'Two_Factor_Toopher' 	  => TWO_FACTOR_DIR . 'providers/class-two-factor-toopher.php',
 		);
 
 		// FIDO U2F is PHP 5.3+ only.
 		if ( version_compare( PHP_VERSION, '5.3.0', '<' ) ) {
-		       unset( $providers['Two_Factor_FIDO_U2F'] );
-		       trigger_error( sprintf( // WPCS: XSS OK.
-		               __( 'FIDO U2F is not available because you are using PHP %s. (Requires 5.3 or greater)' ),
-		               PHP_VERSION
-		       ) );
+			   unset( $providers['Two_Factor_FIDO_U2F'] );
+			   trigger_error( sprintf( // WPCS: XSS OK.
+					   __( 'FIDO U2F is not available because you are using PHP %s. (Requires 5.3 or greater)' ),
+					   PHP_VERSION
+			   ) );
 		}
 
 		/**
@@ -89,10 +112,29 @@ class Two_Factor {
 		 */
 		$providers = apply_filters( 'two_factor_providers', $providers );
 
+		return self::build_providers( $providers );
+	}
+
+	/**
+	 * Sets up and builds a data structure for each provider class.
+	 *
+	 * @since 0.2-dev
+	 * 
+	 * @param array $providers A key-value array where the key is the class name, and
+	 *                         the value is the path to the file containing the class.
+	 * @return array of data structures for each available provider
+	 */
+	private static function &build_providers( &$providers ) {
+		if ( ! is_array( $providers ) ) {
+			return;
+		}
+		$providers_array = array();
+
 		/**
-		 * For each filtered provider,
+		 * For each given provider,
 		 */
 		foreach ( $providers as $class => $path ) {
+
 			include_once( $path );
 
 			/**
@@ -100,19 +142,28 @@ class Two_Factor {
 			 */
 			if ( class_exists( $class ) ) {
 				try {
-					$provider_instance = call_user_func( array( $class, 'get_instance' ) );
+					// we store the object instance in a small data structure
+					$data_obj = array();
 
-					$providers[ $class ] = $provider_instance;
-					$provider_priority[ $class ] = $provider_instance->get_priority();
-				} catch ( Exception $e ) {
-					unset( $providers[ $class ] );
-				}
+					// get an instance of the provider class
+					$inst = call_user_func( array( $class, 'get_instance' ) );
+
+					$data_obj[ 'name' ] = $class;
+					$data_obj[ 'name_strict' ] = strtolower( $class );
+					$data_obj[ 'obj' ] = $inst;
+
+					// now add the new data structure to our array
+					array_push( $providers_array, $data_obj );
+				} catch ( Exception $e ) { }
 			}
 		}
 
 		// Sort providers by their priorities, descending
-		asort( $provider_priority );
+		uasort( $providers_array, function($a, $b) { return ( $a['obj']->get_priority() > $b['obj']->get_priority() ); } );
 
+		// Reset the key value array we were given and return it's reference
+		unset( $providers );
+		$providers = $providers_array;
 		return $providers;
 	}
 
@@ -127,14 +178,14 @@ class Two_Factor {
 			$user = wp_get_current_user();
 		}
 
-		$providers         = self::get_providers();
 		$enabled_providers = get_user_meta( $user->ID, self::ENABLED_PROVIDERS_USER_META_KEY, true );
 		if ( empty( $enabled_providers ) ) {
 			$enabled_providers = array();
 		}
-		$enabled_providers = array_intersect( $enabled_providers, array_keys( $providers ) );
 
-		return $enabled_providers;
+		return array_filter( self::get_providers(), function ( $p ) use ( $enabled_providers ) {
+			return in_array( $p['name'], $enabled_providers );
+		} );
 	}
 
 	/**
@@ -148,13 +199,12 @@ class Two_Factor {
 			$user = wp_get_current_user();
 		}
 
-		$providers            = self::get_providers();
-		$enabled_providers    = self::get_enabled_providers_for_user( $user );
 		$configured_providers = array();
+		$providers = self::get_enabled_providers_for_user( $user );
 
-		foreach ( $providers as $classname => $provider ) {
-			if ( in_array( $classname, $enabled_providers ) && $provider->is_available_for_user( $user ) ) {
-				$configured_providers[ $classname ] = $provider;
+		foreach ( $providers as $provider ) {
+			if ( in_array( $provider, self::get_providers() ) && $provider['obj']->is_available_for_user( $user ) ) {
+				array_push( $configured_providers, $provider );
 			}
 		}
 
@@ -174,20 +224,22 @@ class Two_Factor {
 			$user_id = get_current_user_id();
 		}
 
-		$providers           = self::get_providers();
-		$available_providers = self::get_available_providers_for_user( get_userdata( $user_id ) );
+		$providers = self::get_available_providers_for_user( get_userdata( $user_id ) );
 
 		// If there's only one available provider, force that to be the primary.
-		if ( empty( $available_providers ) ) {
+		if ( empty( $providers ) ) {
 			return null;
-		} elseif ( 1 === count( $available_providers ) ) {
-			$provider = key( $available_providers );
+		} elseif ( 1 === count( $providers ) ) {
+			$provider = $providers[0];
 		} else {
-			$provider = get_user_meta( $user_id, self::PROVIDER_USER_META_KEY, true );
+			$provider_name = get_user_meta( $user_id, self::PROVIDER_USER_META_KEY, true );
 
-			// If the provider specified isn't enabled, just grab the first one that is.
-			if ( ! isset( $available_providers[ $provider ] ) ) {
-				$provider = key( $available_providers );
+			$provider = array_filter( $providers, function($p) { return strcmp( $p['name'], $provider_name ); } );
+
+			if ( empty( $provider ) ) {
+				$provider = $providers[0];
+			} else {
+				$provider = $provider[0];
 			}
 		}
 
@@ -199,10 +251,9 @@ class Two_Factor {
 		 */
 		$provider = apply_filters( 'two_factor_primary_provider_for_user', $provider, $user_id );
 
-		if ( isset( $providers[ $provider ] ) ) {
-			return $providers[ $provider ];
+		if ( isset( $provider['obj'] ) ) {
+			return $provider['obj'];
 		}
-
 		return null;
 	}
 
@@ -424,7 +475,6 @@ class Two_Factor {
 		if ( ! update_user_meta( $user_id, self::USER_META_NONCE_KEY, $login_nonce ) ) {
 			return false;
 		}
-
 		return $login_nonce;
 	}
 
@@ -457,7 +507,6 @@ class Two_Factor {
 			self::delete_login_nonce( $user_id );
 			return false;
 		}
-
 		return true;
 	}
 
@@ -573,7 +622,6 @@ class Two_Factor {
 			$provider = self::get_primary_provider_for_user( $user_id );
 			return esc_html( $provider->get_label() );
 		}
-
 	}
 
 	/**
@@ -634,8 +682,8 @@ class Two_Factor {
 				</tr>
 			</thead>
 			<tbody id="the-list">
-			<?php foreach ( self::get_providers() as $class => $object ) : ?>
-				<?php if ( $object->is_available_for_user( $user ) ) : ?>
+			<?php foreach ( self::get_providers() as $provider ) : ?>
+				<?php if ( $provider['obj']->is_available_for_user( $user ) ) : ?>
 				<tr class="active">
 				<?php else : ?>
 				<tr class="inactive">
@@ -656,11 +704,9 @@ class Two_Factor {
 							</span>
 							<?php endif; ?>
 							<?php
-
 							if ( $object->is_enabled( $user ) ) {
 								_e( ' | ' );
 							}
-							
 							?>
 							<?php if ( $object->is_available_for_user( $user ) ) : ?>
 							<span class="<?php esc_html_e( 'delete' ); ?>">
@@ -694,12 +740,12 @@ class Two_Factor {
 		<?php
 
 		/**
-	 	 * Fires after the Two Factor methods table.
-	 	 *
-	 	 * To be used by Two Factor methods to add settings UI.
+		 * Fires after the Two Factor methods table.
 		 *
-	 	 * @since 0.1-dev
-	 	 */
+		 * To be used by Two Factor methods to add settings UI.
+		 *
+		 * @since 0.1-dev
+		 */
 		do_action( 'show_user_security_settings', $user );
 	}
 
@@ -733,4 +779,128 @@ class Two_Factor {
 			}
 		}
 	}
+
+	public static function settings_section_generate( $argv ) {
+		if ( ! ( is_super_admin() && is_main_site() ) ) {
+			return;
+		}
+
+		$section_name = $argv[ 'id' ];
+		$provider_keys = array_map( function($p) { return $p['name_strict']; }, self::get_providers() );
+		$enabled_providers = array_keys( get_option( self::ENABLED_PROVIDERS_KEY, $provider_keys ) );
+
+		foreach ( self::get_providers() as $provider ) {
+			$id = __( $section_name . '[' . $provider['name_strict'] . ']' );
+			$is_en = in_array( $provider[ 'name_strict' ], $enabled_providers );
+
+			add_settings_field(
+				$id,
+				$provider['obj']->get_label(),
+				array( __CLASS__, 'show_checkbox' ),
+				'general',
+				$section_name,
+				array( 'label_for' => $id , 'id' => $id, 'name' => $id, 'is_enabled' => $is_en )
+			);
+
+			// register the field to the section
+			register_setting( $section_name, $id );
+		}
+	}
+
+	/**
+	 * Display option for provider enable/disable checkbox.
+	 *
+	 * @since 0.2-dev
+	 */
+	public static function show_checkbox( $argv ) {
+		$elem = sprintf( '<input type="checkbox" id="%1$s" name="%2$s" value="1" %3$s >',
+			esc_attr( $argv[ 'id' ] ),
+			esc_attr( $argv[ 'name' ] ),
+			checked( $argv[ 'is_enabled' ], true, false )
+		);
+
+		_e( $elem );
+	}
+
+	/**
+	 * Adds settings to 'WP-Admin -> Settings -> General' page
+	 *
+	 * @since 0.2-dev
+	 */
+	public static function add_settings_general() {
+		if ( ! ( is_super_admin() && is_main_site() ) ) {
+			return;
+		}
+
+		self::add_option_key();
+
+		add_settings_section(
+			self::ENABLED_PROVIDERS_KEY,
+			__( 'Sign-in Policy', 'two_factor' ),
+			array( __CLASS__, 'settings_section_generate' ),
+			'general'
+		);
+
+		register_setting( 'general', self::ENABLED_PROVIDERS_KEY );
+		// settings_fields( self::ENABLED_PROVIDERS_KEY );
+		// delete_option( self::ENABLED_PROVIDERS_KEY );
+	}
+
+	/**
+	 * Display option for provider enable/disable checkbox.
+	 *
+	 * @since 0.2-dev
+	 */
+	public static function add_option_key() {
+		// get the strict name versions for each provider class name
+		$provider_keys = array_values( array_map( function($p) { return $p['name_strict']; }, self::get_providers() ) );
+		if ( empty( $provider_keys ) ) {
+			return;
+		}
+
+		// make sure we have unique provider keys in the database
+		add_option( self::ENABLED_PROVIDERS_KEY, $provider_keys );
+	}
+
+	/**
+	 * Display option for provider enable/disable checkbox.
+	 *
+	 * @since 0.2-dev
+	 */
+	public static function deactivate_hook() {
+		unregister_setting( 'general', self::ENABLED_PROVIDERS_KEY );
+	}
+
+	/**
+	 * Update the global enabled/disabled providers.
+	 *
+	 * @since 0.2-dev
+	 */
+	// public static function refresh_update_info() {
+	// 	global $pagenow;
+
+	// 	if ( ! ( 'options.php' === $pagenow  ) ) {
+	// 		return;
+	// 	}
+
+	// 	if ( ! isset( $_POST[ 'submit' ] ) ) {
+	// 		return;
+	// 	}
+
+	// 	if ( ! isset( $_POST[ self::ENABLED_PROVIDERS_KEY ] ) ) {
+	// 		return;
+	// 	}
+
+	// 	$submitted_providers = $_POST[ self::ENABLED_PROVIDERS_KEY ];
+
+	// 	$valid_providers = array_filter( self::get_providers(), function ( $p ) use ( $submitted_providers ) {
+	// 		$pname = $p[ 'name_strict' ];
+	// 		return ( array_key_exists( $pname, $submitted_providers ) && $submitted_providers[ $pname ] === '1' );
+	// 	} );
+	// 	$new_providers = array_values( array_map( function($p) { return $p['name_strict']; }, $valid_providers ) );
+
+	// 	// $success = update_option( self::ENABLED_PROVIDERS_KEY,  $new_providers );
+
+	// 	// wp_die( var_dump( $new_providers ) );
+	// }
 }
