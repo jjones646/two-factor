@@ -1,5 +1,4 @@
 /* global u2f, u2fL10n */
-var u2fL10n;
 (function($) {
     setTimeout(function() {
         u2f.sign(u2fL10n.request, function(data) {

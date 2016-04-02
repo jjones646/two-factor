@@ -1,6 +1,6 @@
-/* global inlineEditL10n, ajaxurl */
+/* global u2fRowMgmt, ajaxurl */
 (function($) {
-	var inlineEditKey = {
+	u2fRowMgmt = {
 		init: function() {
 			var t = this,
 				row = $('#security-keys-section #inline-edit');

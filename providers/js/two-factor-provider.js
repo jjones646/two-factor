@@ -1,4 +1,4 @@
-/* global u2f, u2fL10n */
+/* global  u2fL10n */
 (function($) {
     $('button.two-factor-register.two-factor-fido-u2f').click(function() {
         if ($(this).hasClass('clicked')) {
@@ -54,7 +54,7 @@
 
     $('button.two-factor-toggle.two-factor-fido-u2f').click(function() {
         var e = $(this).closest('div.two-factor-toggle.two-factor-wrap').children('div.two-factor-toggle:last-child')
-        
+
         $(this).toggleClass('clicked');
         e.slideToggle();
     });
