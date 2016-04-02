@@ -17,7 +17,7 @@ class Two_Factor_FIDO_U2F_Admin {
 	 *
 	 * @type string
 	 */
-	const REGISTER_DATA_USER_META_KEY = '_two_factor_fido_u2f_register_request';
+	const REGISTER_DATA_USER_META_KEY = 'two_factor-u2f_register_request';
 
 	/**
 	 * Add various hooks.
@@ -36,8 +36,8 @@ class Two_Factor_FIDO_U2F_Admin {
 		add_action( 'wp_ajax_inline-save-key',     array( __CLASS__, 'wp_ajax_inline_save' ) );
 
 		if ( ! empty( $provider ) ) {
-			add_action( 'two-factor-user-options-' . $provider,		array( __CLASS__, 'print_user_options' ) );
-			// add_action( 'two-factor-user-option-details-' . $provider, 	array( __CLASS__, 'print_user_option_details' ) );
+			add_action( 'two_factor_user_option-' . $provider,		array( __CLASS__, 'print_user_options' ) );
+			// add_action( 'two_factor_user_option_details-' . $provider, 	array( __CLASS__, 'print_user_option_details' ) );
 		}
 	}
 
@@ -56,8 +56,8 @@ class Two_Factor_FIDO_U2F_Admin {
 			return;
 		}
 
-		wp_enqueue_script( 'u2f-api',        plugins_url( 'includes/Google/u2f-api.js',  __FILE__ ), null, null, true );
-		wp_enqueue_script( 'fido-u2f-admin', plugins_url( 'js/fido-u2f-admin.js', __FILE__ ), array( 'jquery', 'u2f-api' ), null, true );
+		wp_enqueue_script( 'u2f-api',        plugins_url( 'includes/u2f/u2f-api.js',  __FILE__ ), null, null, true );
+		// wp_enqueue_script( 'fido-u2f-admin', plugins_url( 'js/fido-u2f-admin.js', __FILE__ ), array( 'jquery', 'u2f-api' ), null, true );
 
 		$user_id = get_current_user_id();
 		$security_keys = Two_Factor_FIDO_U2F::get_security_keys( $user_id );
@@ -121,47 +121,45 @@ class Two_Factor_FIDO_U2F_Admin {
 		}
 
 		?>
-		<div class="security-keys two-factor-fido-u2f two-factor-toggle two-factor-wrap" id="security-keys-section">
-			<div class="register-security-key">
-				<?php if ( ! is_ssl() ) : ?>
-					<p class="description"><?php esc_html_e( 'Using Security Keys requires an https connection.' ); ?></p>
-					<?php if ( ! empty( $security_keys ) ) : ?>
-					<p><button type="button" class="button button-secondary two-factor-fido-u2f two-factor-toggle"><?php esc_html_e( 'View Keys' ); ?></button></p>
-					<?php endif; ?>
-				<?php else : ?>
-					<?php if ( Two_Factor_FIDO_U2F::is_browser_support() ) : ?>
-					<input type="hidden" name="do_new_security_key" id="do_new_security_key" />
-					<input type="hidden" name="u2f_response" id="u2f_response" />
-					<p>
-					<?php if ( empty( $security_keys ) ) : ?>
-					<p><button type="button" class="button button-secondary two-factor-fido-u2f two-factor-register "><?php esc_html_e( 'Add Key' ); ?></button></p>
-					<?php else : ?>
-					<p><button type="button" class="button button-secondary two-factor-fido-u2f two-factor-toggle"><?php esc_html_e( 'Manage Keys' ); ?></button></p>
-					<?php endif; ?>
-
-					<?php else : ?>
-					<p class="description"><?php esc_html_e( 'You are using an unsupported browser. Security Keys are only supported in Chrome 41+. ' ); ?><a href="https://support.google.com/accounts/answer/6103523"><?php esc_html_e( 'More Information' ); ?></a></p>
-					<p><button type="button" class="button button-secondary two-factor-fido-u2f two-factor-toggle"><?php esc_html_e( 'View Keys' ); ?></button></p>
-					<?php endif; ?>
+		<div class="register-security-key">
+			<?php if ( ! is_ssl() ) : ?>
+				<p class="description"><?php esc_html_e( 'Using Security Keys requires an https connection.' ); ?></p>
+				<?php if ( ! empty( $security_keys ) ) : ?>
+				<p><button type="button" class="button button-secondary two-factor-fido-u2f two-factor-toggle"><?php esc_html_e( 'View Keys' ); ?></button></p>
 				<?php endif; ?>
-			</div>
+			<?php else : ?>
+				<?php if ( Two_Factor_FIDO_U2F::is_browser_support() ) : ?>
+				<input type="hidden" name="do_new_security_key" id="do_new_security_key" />
+				<input type="hidden" name="u2f_response" id="u2f_response" />
+				<p>
+				<?php if ( empty( $security_keys ) ) : ?>
+				<p><button type="button" class="button button-secondary two-factor-fido-u2f two-factor-register "><?php esc_html_e( 'Add Key' ); ?></button></p>
+				<?php else : ?>
+				<p><button type="button" class="button button-secondary two-factor-fido-u2f two-factor-toggle"><?php esc_html_e( 'Manage Keys' ); ?></button></p>
+				<?php endif; ?>
 
-			<?php if ( $new_key ) : ?>
-			<p class="new-security-key"><?php esc_html_e( 'Security Key successfully registered.' ); ?></p>
+				<?php else : ?>
+				<p class="description"><?php esc_html_e( 'You are using an unsupported browser. Security Keys are only supported in Chrome 41+. ' ); ?><a href="https://support.google.com/accounts/answer/6103523"><?php esc_html_e( 'More Information' ); ?></a></p>
+				<p><button type="button" class="button button-secondary two-factor-fido-u2f two-factor-toggle"><?php esc_html_e( 'View Keys' ); ?></button></p>
+				<?php endif; ?>
 			<?php endif; ?>
+		</div>
 
-			<div class="two-factor-fido-u2f two-factor-toggle hide-if-js">
-			<?php
-			if ( ! empty( $security_keys ) ) {
-				require( TWO_FACTOR_DIR . 'providers/class-two-factor-fido-u2f-admin-list-table.php' );
-				$u2f_list_table = new Two_Factor_FIDO_U2F_Admin_List_Table();
-				$u2f_list_table->items = $security_keys;
-				$u2f_list_table->prepare_items();
-				$u2f_list_table->display();
-				$u2f_list_table->inline_edit();
-			}
-			?>
-			</div>
+		<?php if ( $new_key ) : ?>
+		<p class="new-security-key"><?php esc_html_e( 'Security Key successfully registered.' ); ?></p>
+		<?php endif; ?>
+
+		<div class="two-factor-table">
+		<?php
+		if ( ! empty( $security_keys ) ) {
+			require( TWO_FACTOR_DIR . 'providers/class-two-factor-fido-u2f-admin-list-table.php' );
+			$u2f_list_table = new Two_Factor_FIDO_U2F_Admin_List_Table();
+			$u2f_list_table->items = $security_keys;
+			$u2f_list_table->prepare_items();
+			$u2f_list_table->display();
+			$u2f_list_table->inline_edit();
+		}
+		?>
 		</div>
 		<?php
 	}

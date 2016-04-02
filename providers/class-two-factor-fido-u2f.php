@@ -24,14 +24,14 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 	 *
 	 * @type string
 	 */
-	const REGISTERED_KEY_USER_META_KEY = '_two_factor_fido_u2f_registered_key';
+	const REGISTERED_KEY_USER_META_KEY = 'two_factor-u2f_key';
 
 	/**
 	 * The user meta authenticate data.
 	 *
 	 * @type string
 	 */
-	const AUTH_DATA_USER_META_KEY = '_two_factor_fido_u2f_login_request';
+	const AUTH_DATA_USER_META_KEY = 'two_factor-u2f_request';
 
 	/**
 	 * Class constructor.
@@ -42,7 +42,7 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 		$this->priority = 20;
 
 		if ( version_compare( PHP_VERSION, '5.3.0', '<' ) ) {
-			return;
+			throw new Exception('PHP has to be at least version 5.3.0, this is ' . PHP_VERSION );
 		}
 
 		$app_url_parts = parse_url( home_url() );
@@ -56,8 +56,8 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 
 		add_action( 'admin_notices', 								array( $this, 'admin_notices' ) );
 		add_action( 'login_enqueue_scripts',                		array( $this, 'login_enqueue_assets' ) );
-		add_action( 'two-factor-user-options-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
-		add_action( 'two-factor-user-option-details-' .	__CLASS__, 	array( $this, 'print_user_option_details' ) );
+		add_action( 'two_factor_user_option-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
+		add_action( 'two_factor_user_option_details-' .	__CLASS__, 	array( $this, 'print_user_option_details' ) );
 
 		return parent::__construct();
 	}
@@ -105,8 +105,7 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 	 * @since 0.1-dev
 	 */
 	public function login_enqueue_assets() {
-		wp_enqueue_script( 'u2f-api',        plugins_url( 'includes/Google/u2f-api.js', __FILE__ ), null, null, true );
-		wp_enqueue_script( 'fido-u2f-login', plugins_url( 'js/fido-u2f-login.js', __FILE__ ), array( 'jquery', 'u2f-api' ), null, true );
+		wp_enqueue_script( 'u2f-api',        plugins_url( 'includes/u2f/u2f-api.js', __FILE__ ), null, null, true );
 	}
 
 	/**
@@ -125,10 +124,6 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 	 */
 	public function get_description() {
 		return _x( 'Use a hardware device compatible with the U2F protocol for 2-Step authentication during sign-in.', 'Two-Factor Authentication Method Description' );
-	}
-
-	public function is_enabled() {
-		return true;
 	}
 
 	/**
@@ -191,7 +186,7 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 	}
 
 	/**
-	 * Whether this Two Factor provider is configured and available for the user specified.
+	 * Whether this Two-Factor provider is configured and available for the user specified.
 	 *
 	 * @since 0.1-dev
 	 *
@@ -236,7 +231,7 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 			$message = esc_html__( 'You have not registered any Security Keys' );
 		}
 
-		_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'two-factor-details', $message ) );
+		_e( sprintf( '<p>%1$s</p>', $message ) );
 	}
 
 	/**

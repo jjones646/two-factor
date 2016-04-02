@@ -19,14 +19,15 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	 *
 	 * @var string
 	 */
-	const SECRET_META_KEY = '_two_factor_totp_key';
+	const SECRET_META_KEY = 'two_factor-totp_key';
 
 	/**
 	 * The user meta token key.
 	 *
 	 * @var string
 	 */
-	const NOTICES_META_KEY = '_two_factor_totp_notices';
+	const NOTICES_META_KEY = 'two_factor-totp_notices';
+
 
 	const DEFAULT_KEY_BIT_SIZE = 160;
 	const DEFAULT_CRYPTO = 'sha1';
@@ -45,8 +46,8 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 		add_action( 'admin_notices', 								array( $this, 'admin_notices' ) );
 		add_action( 'personal_options_update',              		array( $this, 'user_options_update' ) );
 		add_action( 'edit_user_profile_update',             		array( $this, 'user_options_update' ) );
-		add_action( 'two-factor-user-options-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
-		add_action( 'two-factor-user-option-details-' . __CLASS__, 	array( $this, 'print_user_option_details' ) );
+		add_action( 'two_factor_user_options-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
+		add_action( 'two_factor_user_option_details-' . __CLASS__, 	array( $this, 'print_user_option_details' ) );
 
 		return parent::__construct();
 	}
@@ -95,10 +96,6 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 		return _x( 'Use an Authentication App on your phone that will generate time-synchronized codes for your account.', 'Two-Factor Authentication Method Description' );
 	}
 
-	public function is_enabled() {
-		return true;
-	}
-
 	/**
 	 * Display TOTP options on the user settings page.
 	 *
@@ -111,21 +108,21 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 			return false;
 		}
 
-		wp_nonce_field( 'user_two_factor_totp_options', '_nonce_user_two_factor_totp_options', false );
+		wp_nonce_field( 'two_factor-totp_nonce_option', 'two_factor-totp_nonce', false );
 		$key = get_user_meta( $user->ID, self::SECRET_META_KEY, true );
 
 		if ( empty( $key ) ) {
 			$key = $this->generate_key();
 			$site_name = get_bloginfo( 'name', 'display' );
 			?>
-			<div id="two-factor-totp-options" class="two-factor-register two-factor-totp hide-if-js">
-				<img src="<?php echo esc_url( $this->get_google_qr_code( $site_name . ':' . $user->user_login, $key, $site_name ) ); ?>" id="two-factor-totp-qrcode" />
+			<div id="two_factor-totp-options" class="two-factor-options two-factor-toggle hide-if-js">
+				<img src="<?php echo esc_url( $this->get_google_qr_code( $site_name . ':' . $user->user_login, $key, $site_name ) ); ?>" id="two_factor-totp_qrcode" />
 				<p><strong><?php echo esc_html( $key ); ?></strong></p>
 				<p><?php esc_html_e( 'Scan the QR code or use the provided key. Optionally, you can give an authentication code from your app.' ); ?></p>
 				<p>
-					<label for="two-factor-totp-authcode"><?php esc_html_e( 'Authentication Code:' ); ?></label>
-					<input type="hidden" name="two-factor-totp-key" value="<?php echo esc_attr( $key ) ?>" />
-					<input type="tel" name="two-factor-totp-authcode" id="two-factor-totp-authcode" class="input" value="" size="20" pattern="[0-9]*" />
+					<label for="two_factor-totp_authcode"><?php esc_html_e( 'Authentication Code:' ); ?></label>
+					<input type="hidden" name="two_factor-totp_key" value="<?php echo esc_attr( $key ) ?>" />
+					<input type="tel" name="two_factor-totp_authcode" id="two_factor-totp_authcode" class="input" value="" size="20" pattern="[0-9]*" />
 				</p>
 			</div>
 			<?php
@@ -145,18 +142,9 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 		}
 
 		$site_name = get_bloginfo( 'name', 'display' );
-		$totp_acct = esc_html__( $site_name . ':' . $user->user_login );
+		$message = esc_html__( $site_name . ':' . $user->user_login );
 
-		$message = sprintf( __( '%s' ), $this->get_label() ) . ' is ';
-
-		if ( empty( $key ) ) {
-			$message .= 'disabled';
-		} else {
-			$message .= 'enabled';
-		}
-
-		$message = $totp_acct;
-		_e( sprintf( '<div class="%1$s"><p><strong>Account Tag:</strong> %2$s</p></div>', 'two-factor-details', $message ) );
+		_e( sprintf( '<p>Account Tag: <strong>%1$s</strong></p>', $message ) );
 	}
 
 	/**
@@ -167,20 +155,20 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	 * @param int $user_id The user ID whose options are being updated.
 	 */
 	public function user_options_update( $user_id ) {
-		if ( isset( $_POST['_nonce_user_two_factor_totp_options'] ) ) {
-			check_admin_referer( 'user_two_factor_totp_options', '_nonce_user_two_factor_totp_options' );
+		if ( isset( $_POST['two_factor-totp_nonce'] ) ) {
+			check_admin_referer( 'two_factor-totp_nonce_option', 'two_factor-totp_nonce' );
 
 			$current_key = get_user_meta( $user_id, self::SECRET_META_KEY, true );
 			// If the key hasn't changed or is invalid, do nothing.
-			if ( ! isset( $_POST['two-factor-totp-key'] ) || $current_key === $_POST['two-factor-totp-key'] || ! preg_match( '/^[' . self::$_base_32_chars . ']+$/', $_POST['two-factor-totp-key'] ) ) {
+			if ( ! isset( $_POST['two_factor-totp_key'] ) || $current_key === $_POST['two_factor-totp_key'] || ! preg_match( '/^[' . self::$_base_32_chars . ']+$/', $_POST['two_factor-totp_key'] ) ) {
 				return false;
 			}
 
 			$notices = array();
 
-			if ( ! empty( $_POST['two-factor-totp-authcode'] ) ) {
-				if ( $this->is_valid_authcode( $_POST['two-factor-totp-key'], $_POST['two-factor-totp-authcode'] ) ) {
-					if ( ! update_user_meta( $user_id, self::SECRET_META_KEY, $_POST['two-factor-totp-key'] ) ) {
+			if ( ! empty( $_POST['two_factor-totp_authcode'] ) ) {
+				if ( $this->is_valid_authcode( $_POST['two_factor-totp_key'], $_POST['two_factor-totp_authcode'] ) ) {
+					if ( ! update_user_meta( $user_id, self::SECRET_META_KEY, $_POST['two_factor-totp_key'] ) ) {
 						$notices['error'][] = __( '2-Step, unable to save Verification Code. Please re-scan the QR code or enter the code provided by your application.' );
 					}
 				} else {
@@ -240,7 +228,7 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 		 *
 		 * @param int $max_ticks Max ticks of time correction to allow. Default 4.
 		 */
-		$max_ticks = apply_filters( 'two-factor-totp-time-step-allowance', self::DEFAULT_TIME_STEP_ALLOWANCE );
+		$max_ticks = apply_filters( 'two_factor-totp_tolerance', self::DEFAULT_TIME_STEP_ALLOWANCE );
 
 		// Array of all ticks to allow, sorted using absolute value to test closest match first.
 		$ticks = range( - $max_ticks, $max_ticks );

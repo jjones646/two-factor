@@ -15,32 +15,32 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 class Two_Factor {
 
 	/**
-	 * The user meta provider key.
+	 * The global key holding all available providers.
 	 *
 	 * @type string
 	 */
-	const ENABLED_PROVIDERS_KEY = 'two_factor_enabled_providers';
+	const ENABLED_PROVIDERS_KEY = 'two_factor-providers';
 
 	/**
 	 * The user meta provider key.
 	 *
 	 * @type string
 	 */
-	const PROVIDER_USER_META_KEY = '_two_factor_provider';
+	const PROVIDER_USER_META_KEY = 'two_factor-provider';
 
 	/**
 	 * The user meta enabled providers key.
 	 *
 	 * @type string
 	 */
-	const ENABLED_PROVIDERS_USER_META_KEY = '_two_factor_enabled_providers';
+	const ENABLED_PROVIDERS_USER_META_KEY = 'two_factor-enabled_providers';
 
 	/**
 	 * The user meta nonce key.
 	 *
 	 * @type string
 	 */
-	const USER_META_NONCE_KEY    = '_two_factor_nonce';
+	const USER_META_NONCE_KEY    = 'two_factor-nonce';
 
 	/**
 	 * Set up filters and actions.
@@ -49,29 +49,23 @@ class Two_Factor {
 	 */
 	public static function add_hooks() {
 		register_activation_hook( __FILE__, 	  array( __CLASS__, 'activation_hook' ) );
-
 		register_deactivation_hook( __FILE__, 	  array( __CLASS__, 'deactivate_hook' ) );
 
 		add_action( 'init',                       array( __CLASS__, 'get_providers' ) );
 
 		add_action( 'wp_login',                   array( __CLASS__, 'wp_login' ), 10, 2 );
-
 		add_action( 'login_form_validate_2fa',    array( __CLASS__, 'login_form_validate_2fa' ) );
-
 		add_action( 'login_form_backup_2fa',      array( __CLASS__, 'backup_2fa' ) );
 
 		add_action( 'admin_init', 				  array( __CLASS__, 'add_settings_general' ) );
 
 		add_action( 'show_user_profile',          array( __CLASS__, 'user_two_factor_options' ) );
-
 		add_action( 'edit_user_profile',          array( __CLASS__, 'user_two_factor_options' ) );
 
 		add_action( 'personal_options_update',    array( __CLASS__, 'user_two_factor_options_update' ) );
-
 		add_action( 'edit_user_profile_update',   array( __CLASS__, 'user_two_factor_options_update' ) );
 
 		add_filter( 'manage_users_columns',       array( __CLASS__, 'filter_manage_users_columns' ) );
-
 		add_filter( 'manage_users_custom_column', array( __CLASS__, 'manage_users_custom_column' ), 10, 3 );
 	}
 
@@ -80,26 +74,20 @@ class Two_Factor {
 	 *
 	 * @since 0.1-dev
 	 *
+	 * @param bool $nofilter When set, the method will not filter out any providers.
 	 * @return array of data structures for each available provider
 	 */
-	public static function get_providers() {
+	public static function get_providers( $nofilter = false ) {
+		/**
+		 * To add new two-factor providers, use the 'two_factor_providers' filter instead of
+		 * adding it here directly.
+		 */
 		$providers = array(
 			'Two_Factor_Email'        => TWO_FACTOR_DIR . 'providers/class-two-factor-email.php',
 			'Two_Factor_Totp'         => TWO_FACTOR_DIR . 'providers/class-two-factor-totp.php',
 			'Two_Factor_FIDO_U2F'     => TWO_FACTOR_DIR . 'providers/class-two-factor-fido-u2f.php',
-			'Two_Factor_Backup_Codes' => TWO_FACTOR_DIR . 'providers/class-two-factor-backup-codes.php',
-			// 'Two_Factor_Duo_Security' => TWO_FACTOR_DIR . 'providers/class-two-factor-duo-security.php',
-			// 'Two_Factor_Toopher' 	  => TWO_FACTOR_DIR . 'providers/class-two-factor-toopher.php',
+			'Two_Factor_Backup_Codes' => TWO_FACTOR_DIR . 'providers/class-two-factor-backup-codes.php'
 		);
-
-		// FIDO U2F is PHP 5.3+ only.
-		if ( version_compare( PHP_VERSION, '5.3.0', '<' ) ) {
-			   unset( $providers['Two_Factor_FIDO_U2F'] );
-			   trigger_error( sprintf( // WPCS: XSS OK.
-					   __( 'FIDO U2F is not available because you are using PHP %s. (Requires 5.3 or greater)' ),
-					   PHP_VERSION
-			   ) );
-		}
 
 		/**
 		 * Filter the supplied providers.
@@ -112,7 +100,7 @@ class Two_Factor {
 		 */
 		$providers = apply_filters( 'two_factor_providers', $providers );
 
-		return self::build_providers( $providers );
+		return self::build_providers( $providers, $nofilter );
 	}
 
 	/**
@@ -122,9 +110,10 @@ class Two_Factor {
 	 * 
 	 * @param array $providers A key-value array where the key is the class name, and
 	 *                         the value is the path to the file containing the class.
+	 * @param bool $nofilter When set, the method will not filter out any providers.
 	 * @return array of data structures for each available provider
 	 */
-	private static function &build_providers( &$providers ) {
+	private static function &build_providers( &$providers, $nofilter = false ) {
 		if ( ! is_array( $providers ) ) {
 			return;
 		}
@@ -134,7 +123,7 @@ class Two_Factor {
 		 * For each given provider,
 		 */
 		foreach ( $providers as $class => $path ) {
-
+			// include the provider's class file
 			include_once( $path );
 
 			/**
@@ -147,23 +136,42 @@ class Two_Factor {
 
 					// get an instance of the provider class
 					$inst = call_user_func( array( $class, 'get_instance' ) );
+					$key = sanitize_key( $class );
 
 					$data_obj[ 'name' ] = $class;
-					$data_obj[ 'name_strict' ] = strtolower( $class );
 					$data_obj[ 'obj' ] = $inst;
 
+					$pos = strpos($key, 'two_factor_');
+					if ( $pos === 0 ) {
+					    $key = substr_replace( $key, '', $pos, strlen( 'two_factor_' ) );
+					}
+					$data_obj[ 'key' ] = $key;
+					
 					// now add the new data structure to our array
 					array_push( $providers_array, $data_obj );
-				} catch ( Exception $e ) { }
+				} catch ( Exception $e ) {}
 			}
 		}
 
 		// Sort providers by their priorities, descending
 		uasort( $providers_array, function($a, $b) { return ( $a['obj']->get_priority() > $b['obj']->get_priority() ); } );
 
-		// Reset the key value array we were given and return it's reference
-		unset( $providers );
-		$providers = $providers_array;
+		if ( $nofilter ) {
+			// don't exclude any providers from the list that gets set and returned
+			$providers = $providers_array;
+		} else {
+			// get a list of global providers, if it's not in this array, it should never show for a non-super-admin.
+			$enabled_providers = self::get_enabled_providers();
+			if ( ! $enabled_providers ) {
+				self::add_option_key( $providers_array );
+				$enabled_providers = self::get_enabled_providers();
+			}
+			
+			// Reset the key value array we were given and return it's reference
+			$providers = array_filter( $providers_array, function ( $p ) use ( $enabled_providers ) {
+				return in_array( $p[ 'key' ], $enabled_providers );
+			} );
+		}
 		return $providers;
 	}
 
@@ -178,13 +186,15 @@ class Two_Factor {
 			$user = wp_get_current_user();
 		}
 
-		$enabled_providers = get_user_meta( $user->ID, self::ENABLED_PROVIDERS_USER_META_KEY, true );
-		if ( empty( $enabled_providers ) ) {
-			$enabled_providers = array();
+		// get a list of the user's enabled providers, the intersection of this and the above are the
+		// enabled providers for the user
+		$providers = get_user_meta( $user->ID, self::ENABLED_PROVIDERS_USER_META_KEY, true );
+		if ( empty( $providers ) ) {
+			$providers = array();
 		}
 
-		return array_filter( self::get_providers(), function ( $p ) use ( $enabled_providers ) {
-			return in_array( $p['name'], $enabled_providers );
+		return array_filter( self::get_providers(), function ( $p ) use ( $providers ) {
+			return in_array( $p['name'], $providers );
 		} );
 	}
 
@@ -265,8 +275,7 @@ class Two_Factor {
 	 * @param int $user_id Optional. User ID. Default is 'null'.
 	 */
 	public static function is_user_using_two_factor( $user_id = null ) {
-		$provider = self::get_primary_provider_for_user( $user_id );
-		return ! empty( $provider );
+		return ! empty( self::get_primary_provider_for_user( $user_id ) );
 	}
 
 	/**
@@ -338,6 +347,8 @@ class Two_Factor {
 			wp_die( esc_html__( 'Cheatin&#8217; uh?' ), 403 );
 		}
 
+		wp_enqueue_style( 'two-factor-login', plugins_url( 'providers/css/two-factor-login.css', __FILE__ ) );
+
 		self::login_html( $user, $_GET['wp-auth-nonce'], $_GET['redirect_to'], '', $provider );
 
 		exit;
@@ -362,10 +373,11 @@ class Two_Factor {
 		}
 
 		$provider_class = get_class( $provider );
-
 		$available_providers = self::get_available_providers_for_user( $user );
 		$backup_providers = array_diff_key( $available_providers, array( $provider_class => null ) );
+
 		$interim_login = isset( $_REQUEST['interim-login'] ); // WPCS: override ok.
+
 		$wp_login_url = wp_login_url();
 
 		$rememberme = 0;
@@ -415,7 +427,7 @@ class Two_Factor {
 			</div>
 		<?php elseif ( 1 < count( $backup_providers ) ) : ?>
 			<div class="backup-methods-wrap">
-				<p class="backup-methods"><a href="javascript:;" onclick="document.querySelector('ul.backup-methods').style.display = 'block';"><?php esc_html_e( 'Or, use a backup method…', 'two-factor' ); ?></a></p>
+				<p class="backup-methods"><a href="javascript:;" onclick="document.querySelector('ul.backup-methods').style.display = 'block';"><?php esc_html_e( 'Or, use a backup method.', 'two-factor' ); ?></a></p>
 				<ul class="backup-methods">
 					<?php foreach ( $backup_providers as $backup_classname => $backup_provider ) : ?>
 						<li><a href="<?php echo esc_url( add_query_arg( urlencode_deep( array(
@@ -434,23 +446,6 @@ class Two_Factor {
 		<p id="backtoblog">
 			<a href="<?php echo esc_url( home_url( '/' ) ); ?>" title="<?php esc_attr_e( 'Are you lost?' ); ?>"><?php echo esc_html( sprintf( __( '&larr; Back to %s' ), get_bloginfo( 'title', 'display' ) ) ); ?></a>
 		</p>
-
-		<style>
-		/* @todo: migrate to an external stylesheet. */
-		.backup-methods-wrap {
-			margin-top: 16px;
-			padding: 0 24px;
-		}
-		.backup-methods-wrap a {
-			color: #999;
-			text-decoration: none;
-		}
-		ul.backup-methods {
-			display: none;
-			padding-left: 1.5em;
-		}
-		</style>
-
 		<?php
 		/** This action is documented in wp-login.php */
 		do_action( 'login_footer' ); ?>
@@ -556,11 +551,7 @@ class Two_Factor {
 
 		self::delete_login_nonce( $user->ID );
 
-		$rememberme = false;
-		if ( isset( $_REQUEST['rememberme'] ) && $_REQUEST['rememberme'] ) {
-			$rememberme = true;
-		}
-
+		$rememberme = isset( $_REQUEST['rememberme'] ) && (bool) $_REQUEST['rememberme'];
 		wp_set_auth_cookie( $user->ID, $rememberme );
 
 		// Must be global because that's how login_header() uses it.
@@ -624,6 +615,28 @@ class Two_Factor {
 		}
 	}
 
+	// update_usermeta( absint( $user_id ), 'twitter', wp_kses_post( $_POST['twitter'] ) );
+
+	/**
+	 * Adds settings to 'WP-Admin -> Settings -> General' page
+	 *
+	 * @since 0.2-dev
+	 */
+	public static function add_settings_general() {
+		if ( ! ( is_super_admin() && is_main_site() ) ) {
+			return;
+		}
+
+		add_settings_section(
+			self::ENABLED_PROVIDERS_KEY,
+			__( 'Two-factor Methods', 'two_factor' ),
+			array( __CLASS__, 'settings_section_generate' ),
+			'general'
+		);
+
+		register_setting( 'general', self::ENABLED_PROVIDERS_KEY );
+	}
+
 	/**
 	 * Add user profile fields.
 	 *
@@ -634,18 +647,22 @@ class Two_Factor {
 	 * @param WP_User $user WP_User object of the logged-in user.
 	 */
 	public static function user_two_factor_options( $user ) {
-		wp_enqueue_style( 'user-edit-2fa', plugins_url( 'providers/css/user-edit.css', __FILE__ ) );
-		$enabled_providers = get_user_meta( $user->ID, self::ENABLED_PROVIDERS_USER_META_KEY, true );
+		if ( empty( self::get_providers() ) ) {
+			return;
+		}
+		wp_enqueue_style( 'two-factor', plugins_url( 'providers/css/two-factor.css', __FILE__ ) );
+
+		$enabled_providers = self::get_available_providers_for_user();
+		$two_factor_disabled = empty( $enabled_providers );
 
 		?>
 		<h2><?php _e( 'Sign-in Methods' ); ?></h2>
 		<table class="form-table">
-		<tr id="two-factor-profile-option" class="two-factor two-factor-wrap">
+		<tr id="two_factor-profile_option" class="two-factor two-factor-wrap">
 			<th scope="row"><?php _e( '2-Step Verification' ); ?></th>
 			<td>
 		<?php
 
-		$two_factor_disabled = empty( $enabled_providers );
 		if ( $two_factor_disabled ) {
 			// Because get_user_meta() has no way of providing a def
 			$enabled_providers = array();
@@ -658,13 +675,12 @@ class Two_Factor {
 			<?php
 		} else {
 			?><div class="two-factor two-factor-toggle"><?php
-
 		} 
 
-		$primary_provider = get_user_meta( $user->ID, self::PROVIDER_USER_META_KEY, true );
+		$primary_provider = self::get_primary_provider_for_user( $user->ID );
 		wp_nonce_field( 'user_two_factor_options', '_nonce_user_two_factor_options', false );
 
-		if ( ! self::is_user_using_two_factor() ) {
+		if ( $two_factor_disabled ) {
 			?>
 			<input type="hidden" name="<?php echo esc_attr( self::ENABLED_PROVIDERS_USER_META_KEY ); ?>[]" value="<?php /* Dummy input so $_POST value is passed when no providers are enabled. */ ?>"/>
 			<?php
@@ -689,43 +705,44 @@ class Two_Factor {
 				<tr class="inactive">
 				<?php endif; ?>
 					<th scope="row" class="check-column">
-						<label class="screen-reader-text">Select <?php $object->print_label(); ?></label>
-						<input type="hidden" name="checked[]" value="<?php $object->is_available_for_user( $user ); ?>">
+						<label class="screen-reader-text">Select <?php $provider['obj']->print_label(); ?></label>
+						<input type="hidden" name="checked[]" value="<?php $provider['obj']->is_available_for_user( $user ); ?>">
 					</th>
-					<td class="plugin-title column-primary"><strong><?php $object->print_label(); ?></strong>
+					<td class="plugin-title column-primary"><strong><?php $provider['obj']->print_label(); ?></strong>
 						<div class="row-actions visible">
-							<?php if ( $object->is_enabled( $user ) ) : ?>
-							<span class="<?php esc_html_e( 'deactivate' ); ?>">
-							<a href="#" aria-label="Deactivate <?php $object->print_label(); ?>">Deactivate</a>
+							<?php if ( $provider['obj']->is_available_for_user( $user ) ) : ?>
+							<span class="two-factor-option <?php esc_html_e( 'deactivate' ); ?>">
+							<a href="#" id="two_factor-deactivate-<?php _e( esc_attr( $provider['key'] ) ); ?>" aria-label="Deactivate <?php $provider['obj']->print_label(); ?>">Deactivate</a>
 							</span>
 							<?php else : ?>
-							<span class="<?php esc_html_e( 'activate' ); ?>">
-							<a href="#" aria-label="Activate <?php $object->print_label(); ?>">Activate</a>
+							<span class="two-factor-option <?php esc_html_e( 'activate' ); ?>">
+							<a href="#" id="two_factor-activate-<?php _e( esc_attr( $provider['key'] ) ); ?>" aria-label="Activate <?php $provider['obj']->print_label(); ?>">Activate</a>
 							</span>
 							<?php endif; ?>
-							<?php
-							if ( $object->is_enabled( $user ) ) {
-								_e( ' | ' );
-							}
-							?>
-							<?php if ( $object->is_available_for_user( $user ) ) : ?>
-							<span class="<?php esc_html_e( 'delete' ); ?>">
-							<a href="#" aria-label="Remove Data <?php $object->print_label(); ?>">Remove Data</a>
+							<?php _e( ' | ' ); ?>
+							<?php if ( $provider['obj']->is_available_for_user( $user ) ) : ?>
+							<span class="two-factor-option <?php esc_html_e( 'delete' ); ?>">
+							<a href="#" id="two_factor-delete-<?php _e( esc_attr( $provider['key'] ) ); ?>" aria-label="Remove Data <?php $provider['obj']->print_label(); ?>">Remove Data</a>
 							</span>
 							<?php else : ?>
-							<span class="<?php esc_html_e( 'setup' ); ?>">
-							<a href="#" aria-label="Setup <?php $object->print_label(); ?>">Setup</a>
+							<span class="two-factor-option <?php esc_html_e( 'setup' ); ?>">
+							<a href="#" id="two_factor-setup-<?php _e( esc_attr( $provider['key'] ) ); ?>" aria-label="Setup <?php $provider['obj']->print_label(); ?>">Setup</a>
 							</span>
 							<?php endif; ?>
 						</div>
 					</td>
 					<td class="column-details desc">
 						<div class="plugin-description two-factor-column-details">
-						<?php $object->print_description(); ?>
+						<?php $provider['obj']->print_description(); ?>
 						</div>
-						<div>
-						<?php do_action( 'two-factor-user-option-details-' . $class, $user ); ?>
-						<?php do_action( 'two-factor-user-options-' . $class, $user ); ?>
+						<div class="two-factor-options">
+							<div class="two-factor-option-details">
+							<?php do_action( 'two_factor_user_option_details-' . $provider['name'], $user ); ?>
+							</div>
+							<div class="two-factor-options two-factor-toggle hide-if-js">
+							<?php do_action( 'two_factor_user_options-' . $provider['name'], $user ); ?>
+							</div>
+						</div>
 						</div>
 					</td>
 				</tr>
@@ -784,12 +801,12 @@ class Two_Factor {
 		}
 
 		$section_name = $argv[ 'id' ];
-		$provider_keys = array_map( function($p) { return $p['name_strict']; }, self::get_providers() );
-		$enabled_providers = array_keys( get_option( self::ENABLED_PROVIDERS_KEY, $provider_keys ) );
+		$provider_keys = array_map( function($p) { return $p['key']; }, self::get_providers() );
+		$enabled_providers = self::get_enabled_providers( $provider_keys );
 
-		foreach ( self::get_providers() as $provider ) {
-			$id = __( $section_name . '[' . $provider['name_strict'] . ']' );
-			$is_en = in_array( $provider[ 'name_strict' ], $enabled_providers );
+		foreach ( self::get_providers( true ) as $provider ) {
+			$id = __( $section_name . '[' . $provider['key'] . ']' );
+			$is_en = in_array( $provider[ 'key' ], $enabled_providers );
 
 			add_settings_field(
 				$id,
@@ -820,36 +837,25 @@ class Two_Factor {
 		_e( $elem );
 	}
 
-	/**
-	 * Adds settings to 'WP-Admin -> Settings -> General' page
-	 *
-	 * @since 0.2-dev
-	 */
-	public static function add_settings_general() {
-		if ( ! ( is_super_admin() && is_main_site() ) ) {
-			return;
+	public static function get_enabled_providers( $default_val = null ) {
+		$providers = get_option( self::ENABLED_PROVIDERS_KEY, $default_val );
+
+		if ( ! $providers ) {
+			return array();
 		}
-
-		self::add_option_key();
-
-		add_settings_section(
-			self::ENABLED_PROVIDERS_KEY,
-			__( 'Sign-in Policy', 'two_factor' ),
-			array( __CLASS__, 'settings_section_generate' ),
-			'general'
-		);
-
-		register_setting( 'general', self::ENABLED_PROVIDERS_KEY );
+		return array_keys( $providers );
 	}
 
 	/**
-	 * Display option for provider enable/disable checkbox.
+	 * Add the given provider keys as a site wide option if it doesn't
+	 * already exist in the database. This will do nothing if the key
+	 * already exists.
 	 *
 	 * @since 0.2-dev
 	 */
-	public static function add_option_key() {
+	public static function add_option_key( array $providers ) {
 		// get the strict name versions for each provider class name
-		$provider_keys = array_values( array_map( function($p) { return $p['name_strict']; }, self::get_providers() ) );
+		$provider_keys = array_values( array_map( function( $p ) { return $p[ 'key' ]; }, $providers ) );
 		if ( empty( $provider_keys ) ) {
 			return;
 		}

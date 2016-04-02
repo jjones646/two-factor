@@ -1,0 +1,14 @@
+.backup-methods-wrap {
+    margin-top: 16px;
+    padding: 0 24px;
+}
+
+.backup-methods-wrap a {
+    color: #999;
+    text-decoration: none;
+}
+
+ul.backup-methods {
+    display: none;
+    padding-left: 1.5em;
+}

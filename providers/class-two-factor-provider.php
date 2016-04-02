@@ -25,7 +25,24 @@ abstract class Two_Factor_Provider {
 	 * @since 0.1-dev
 	 */
 	protected function __construct() {
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_assets_base' ) );
+
 		return $this;
+	}
+
+	/**
+	 * Enqueue assets.
+	 *
+	 * @since 0.2-dev
+	 *
+	 * @param string $hook Current page.
+	 */
+	public static function enqueue_assets_base( $hook ) {
+		if ( ! in_array( $hook, array( 'user-edit.php', 'profile.php' ) ) ) {
+			return;
+		}
+
+		wp_enqueue_script( 'two-factor-js', plugins_url( 'js/two-factor-provider.js', __FILE__ ), array( 'jquery' ), null, true );
 	}
 
 	/**

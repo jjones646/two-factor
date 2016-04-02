@@ -17,7 +17,7 @@ class Two_Factor_Email extends Two_Factor_Provider {
 	 *
 	 * @type string
 	 */
-	const TOKEN_META_KEY = '_two_factor_email_token';
+	const TOKEN_META_KEY = 'two_factor-email_token';
 
 	/**
 	 * Class constructor.
@@ -27,9 +27,9 @@ class Two_Factor_Email extends Two_Factor_Provider {
 	protected function __construct() {
 		$this->priority = 60;
 
-		add_action( 'admin_enqueue_scripts',       					array( $this, 'enqueue_assets' ) );
-		add_action( 'two-factor-user-options-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
-		add_action( 'two-factor-user-option-details-' .	__CLASS__, 	array( $this, 'print_user_option_details' ) );
+		// add_action( 'admin_enqueue_scripts',       					array( $this, 'enqueue_assets' ) );
+		add_action( 'two_factor_user_option-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
+		add_action( 'two_factor_user_option_details-' .	__CLASS__, 	array( $this, 'print_user_option_details' ) );
 
 		return parent::__construct();
 	}
@@ -49,19 +49,19 @@ class Two_Factor_Email extends Two_Factor_Provider {
 	}
 
 	/**
-	 * Enqueue assets.
-	 *
-	 * @since 0.2-dev
-	 *
-	 * @param string $hook Current page.
-	 */
-	public static function enqueue_assets( $hook ) {
-		if ( ! in_array( $hook, array( 'user-edit.php', 'profile.php' ) ) ) {
-			return;
-		}
+	//  * Enqueue assets.
+	//  *
+	//  * @since 0.2-dev
+	//  *
+	//  * @param string $hook Current page.
+	//  */
+	// public static function enqueue_assets( $hook ) {
+	// 	if ( ! in_array( $hook, array( 'user-edit.php', 'profile.php' ) ) ) {
+	// 		return;
+	// 	}
 
-		wp_enqueue_script( 'email-options', plugins_url( 'js/email-options.js', __FILE__ ), array( 'jquery' ), null, true );
-	}
+	// 	wp_enqueue_script( 'email-options', plugins_url( 'js/email-options.js', __FILE__ ), array( 'jquery' ), null, true );
+	// }
 
 	/**
 	 * Returns the name of the provider.
@@ -79,10 +79,6 @@ class Two_Factor_Email extends Two_Factor_Provider {
 	 */
 	public function get_description() {
 		return _x( 'Receive single-use codes at your account\'s email address.', 'Two-Factor Authentication Method Description' );
-	}
-
-	public function is_enabled() {
-		return true;
 	}
 
 	/**
@@ -116,7 +112,7 @@ class Two_Factor_Email extends Two_Factor_Provider {
 		<p><?php esc_html_e( 'A verification code has been sent to the email address associated with your account.' ); ?></p>
 		<p>
 			<label for="authcode"><?php esc_html_e( 'Verification Code:' ); ?></label>
-			<input type="tel" name="two-factor-email-code" id="authcode" class="input" value="" size="20" pattern="[0-9]*" />
+			<input type="tel" name="two_factor-email_code" id="authcode" class="input" value="" size="20" pattern="[0-9]*" />
 		</p>
 		<script type="text/javascript">
 			setTimeout( function(){
@@ -142,11 +138,11 @@ class Two_Factor_Email extends Two_Factor_Provider {
 	 * @return boolean
 	 */
 	public function validate_authentication( $user ) {
-		if ( ! isset( $user->ID ) || ! isset( $_REQUEST['two-factor-email-code'] ) ) {
+		if ( ! isset( $user->ID ) || ! isset( $_REQUEST['two_factor-email_code'] ) ) {
 			return false;
 		}
 
-		return $this->validate_token( $user->ID, $_REQUEST['two-factor-email-code'] );
+		return $this->validate_token( $user->ID, $_REQUEST['two_factor-email_code'] );
 	}
 
 	/**
@@ -158,11 +154,11 @@ class Two_Factor_Email extends Two_Factor_Provider {
 	 * @return boolean
 	 */
 	public function is_available_for_user( $user ) {
-		if ( ! isset( $user->ID ) ) {
-			return false;
+		// does this user have a valid email address field?
+		if ( is_email( $user->user_email ) ) {
+			return true;
 		}
-
-		return true;
+		return false;
 	}
 
 	/**
@@ -194,7 +190,7 @@ class Two_Factor_Email extends Two_Factor_Provider {
 
 		$message = sprintf( __( 'Single-use codes will be sent to <strong>%1$s</strong>' ), $user->user_email );
 
-		_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'two-factor-details', $message ) );
+		_e( sprintf( '<p>%1$s</p>', $message ) );
 	}
 
 	/**
@@ -215,7 +211,7 @@ class Two_Factor_Email extends Two_Factor_Provider {
 			return;
 		}
 
-		$message = sprintf( __( 'Two-Factor: You are out of backup codes and need to <a href="%s">generate more.</a>' ), esc_url( get_edit_user_link( $user->ID ) . '#two-factor-backup-codes' ) );
+		$message = sprintf( __( 'Two-Factor: You are out of backup codes and need to <a href="%s">generate more.</a>' ), esc_url( get_edit_user_link( $user->ID ) . '#two_factor-backup_codes' ) );
 
 		esc_html_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'notice notice-error is-dismissible', $message ) );
 	}

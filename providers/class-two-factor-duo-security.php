@@ -19,14 +19,14 @@ class Two_Factor_Duo_Security extends Two_Factor_Provider {
 	 *
 	 * @var string
 	 */
-	const SECRET_META_KEY = '_two_factor_due_security_key';
+	const SECRET_META_KEY = 'two_factor-due_mobile_key';
 
 	/**
 	 * The user meta token key.
 	 *
 	 * @var string
 	 */
-	const NOTICES_META_KEY = '_two_factor_due_security_notices';
+	const NOTICES_META_KEY = 'two_factor-due_mobile_notices';
 
 	/**
 	 * The timeout for duo to expire a request.
@@ -94,8 +94,8 @@ class Two_Factor_Duo_Security extends Two_Factor_Provider {
 		add_action( 'admin_notices', 								array( $this, 'admin_notices' ) );
 		add_action( 'personal_options_update',              		array( $this, 'user_options_update' ) );
 		add_action( 'edit_user_profile_update',             		array( $this, 'user_options_update' ) );
-		add_action( 'two-factor-user-options-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
-		add_action( 'two-factor-user-option-details-' . __CLASS__, 	array( $this, 'print_user_option_details' ) );
+		add_action( 'two_factor_user_option-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
+		add_action( 'two_factor_user_option_details-' . __CLASS__, 	array( $this, 'print_user_option_details' ) );
 
 		/*-------------XML-RPC Features-----------------*/
 	    if($this->duo_get_option('duo_xmlrpc', 'off') == 'off') {
@@ -158,10 +158,6 @@ class Two_Factor_Duo_Security extends Two_Factor_Provider {
 		return _x( 'Use Duo Security to receive push notifications to your phone.', 'Two-Factor Authentication Method Description' );
 	}
 
-	public function is_enabled() {
-		return true;
-	}
-
 	protected function get_android_link() {
 		return esc_url_raw( 'https://play.google.com/store/apps/details?id=com.duosecurity.duomobile' );
 	}
@@ -184,6 +180,7 @@ class Two_Factor_Duo_Security extends Two_Factor_Provider {
 
 		require_once( TWO_FACTOR_DIR . 'providers/class-mobile-detect.php' );
 		$detect = new Mobile_Detect();
+        // wp_is_mobile()
 
 		// build a customized message using this info
 		$message = '';

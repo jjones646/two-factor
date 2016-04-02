@@ -19,14 +19,14 @@ class Two_Factor_Toopher extends Two_Factor_Provider {
 	 *
 	 * @var string
 	 */
-	const SECRET_META_KEY = '_two_factor_toopher_key';
+	const SECRET_META_KEY = 'two_factor-toopher_key';
 
 	/**
 	 * The user meta token key.
 	 *
 	 * @var string
 	 */
-	const NOTICES_META_KEY = '_two_factor_toopher_notices';
+	const NOTICES_META_KEY = 'two_factor-toopher_notices';
 
 	const DEFAULT_KEY_BIT_SIZE = 160;
 	const DEFAULT_CRYPTO = 'sha1';
@@ -45,8 +45,8 @@ class Two_Factor_Toopher extends Two_Factor_Provider {
 		add_action( 'admin_notices', 								array( $this, 'admin_notices' ) );
 		add_action( 'personal_options_update',              		array( $this, 'user_options_update' ) );
 		add_action( 'edit_user_profile_update',             		array( $this, 'user_options_update' ) );
-		add_action( 'two-factor-user-options-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
-		add_action( 'two-factor-user-option-details-' . __CLASS__, 	array( $this, 'print_user_option_details' ) );
+		add_action( 'two_factor_user_option-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
+		add_action( 'two_factor_user_option_details-' . __CLASS__, 	array( $this, 'print_user_option_details' ) );
 
 		return parent::__construct();
 	}
@@ -93,10 +93,6 @@ class Two_Factor_Toopher extends Two_Factor_Provider {
 	 */
 	public function get_description() {
 		return _x( 'Use Toopher to receive push notifications to your phone.', 'Two-Factor Authentication Method Description' );
-	}
-
-	public function is_enabled() {
-		return true;
 	}
 
 	/**
@@ -156,7 +152,7 @@ class Two_Factor_Toopher extends Two_Factor_Provider {
 		}
 
 		$message = $totp_acct;
-		_e( sprintf( '<div class="%1$s"><p><strong>Account Tag:</strong> %2$s</p></div>', 'two-factor-details', $message ) );
+		_e( sprintf( '<p><strong>Account Tag:</strong> %1$s</p>', $message ) );
 	}
 
 	/**

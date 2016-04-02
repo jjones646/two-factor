@@ -17,7 +17,7 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	 *
 	 * @type string
 	 */
-	const BACKUP_CODES_META_KEY = '_two_factor_backup_codes';
+	const BACKUP_CODES_META_KEY = 'two_factor-backup_codes';
 
 	/**
 	 * The number backup codes.
@@ -37,8 +37,8 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 		add_action( 'admin_enqueue_scripts',       					array( $this, 'enqueue_assets' ) );
 		add_action( 'admin_notices', 								array( $this, 'admin_notices' ) );
 		add_action( 'wp_ajax_two_factor_backup_codes_generate', 	array( $this, 'ajax_generate_json' ) );
-		add_action( 'two-factor-user-options-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
-		add_action( 'two-factor-user-option-details-' .	__CLASS__, 	array( $this, 'print_user_option_details' ) );
+		add_action( 'two_factor_user_option-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
+		add_action( 'two_factor_user_option_details-' .	__CLASS__, 	array( $this, 'print_user_option_details' ) );
 
 		return parent::__construct();
 	}
@@ -90,7 +90,7 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 			return;
 		}
 
-		$message = sprintf( __( 'Two-Factor: You are out of backup codes and need to <a href="%s">generate more.</a>' ), esc_url( get_edit_user_link( $user->ID ) . '#two-factor-backup-codes' ) );
+		$message = sprintf( __( 'Two-Factor: You are out of backup codes and need to <a href="%s">generate more.</a>' ), esc_url( get_edit_user_link( $user->ID ) . '#two_factor-backup_codes' ) );
 
 		esc_html_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'notice notice-error is-dismissible', $message ) );
 	}
@@ -111,10 +111,6 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	 */
 	public function get_description() {
 		return _x( 'Generate ' . self::NUMBER_OF_CODES . ' single-use codes that can be used in emergency situations when all other methods are unavailable.', 'Two-Factor Authentication Method Description' );
-	}
-
-	public function is_enabled() {
-		return true;
 	}
 
 	/**
@@ -144,14 +140,14 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 		if ( ! isset( $user->ID ) ) {
 			return false;
 		}
-		$ajax_nonce = wp_create_nonce( 'two-factor-backup-codes-generate-json-' . $user->ID );
+		$ajax_nonce = wp_create_nonce( 'two_factor-backup_codes_generate_json-' . $user->ID );
 		$count = self::codes_remaining_for_user( $user );
 		?>
 		<div class="two-factor-backup-codes-wrapper hide-if-js">
 			<ol class="two-factor-backup-codes-unused-codes"></ol>
 			<p class="description"><?php esc_html_e( 'Store these codes in a secure location. You will not be able to view these codes again.' ); ?></p>
 			<p>
-				<a class="button button-two-factor-backup-codes-download button-secondary hide-if-no-js" href="javascript:void(0);" id="two-factor-backup-codes-download-link" download="two-factor-backup-codes.txt"><?php esc_html_e( 'Download Codes' ); ?></a>
+				<a class="button button-two-factor-backup-codes-download button-secondary hide-if-no-js" href="javascript:void(0);" id="two_factor-backup_codes_download_link" download="two-factor-backup-codes.txt"><?php esc_html_e( 'Download Codes' ); ?></a>
 			<p>
 		</div>
 		<script type="text/javascript">
@@ -161,7 +157,7 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 						method: 'POST',
 						url: ajaxurl,
 						data: {
-							action: 'two_factor_backup_codes_generate',
+							action: 'two_factor-backup_codes_generate',
 							user_id: '<?php echo esc_js( $user->ID ); ?>',
 							nonce: '<?php echo esc_js( $ajax_nonce ); ?>'
 						},
@@ -188,7 +184,7 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 								txt_data += i + 1 + '. ' + response.data.codes[ i ] + '\n';
 							}
 
-							$( '#two-factor-backup-codes-download-link' ).attr( 'href', encodeURI( txt_data ) );
+							$( '#two_factor-backup_codes_download_link' ).attr( 'href', encodeURI( txt_data ) );
 						}
 					} );
 				} );
@@ -212,7 +208,7 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 		$count = count( get_user_meta( $user->ID, self::BACKUP_CODES_META_KEY, true ) );
 		$message = sprintf( __( 'You have <strong>%s</strong> unused %s' ), $count, _n( 'code', 'codes', $count ) ) . __( ' remaining' );
 
-		_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'two-factor-details', $message ) );
+		_e( sprintf( '<p>%1$s</p>', $message ) );
 	}
 
 	/**
@@ -259,7 +255,7 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	 */
 	public function ajax_generate_json() {
 		$user = get_user_by( 'id', sanitize_text_field( $_POST['user_id'] ) );
-		check_ajax_referer( 'two-factor-backup-codes-generate-json-' . $user->ID, 'nonce' );
+		check_ajax_referer( 'two_factor-backup_codes_generate_json-' . $user->ID, 'nonce' );
 
 		// Setup the return data.
 		$codes = $this->generate_codes( $user );
@@ -300,7 +296,7 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 		<p><?php esc_html_e( 'Enter a single-use backup code.' ); ?></p>
 		<p>
 			<label for="authcode"><?php esc_html_e( 'Backup Code:' ); ?></label>
-			<input type="tel" name="two-factor-backup-code" id="authcode" class="input" value="" size="20" pattern="[0-9]*" />
+			<input type="tel" name="two_factor-backup_code" id="authcode" class="input" value="" size="20" pattern="[0-9]*" />
 		</p>
 		<?php
 		submit_button( __( 'Submit' ) );
@@ -315,7 +311,7 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	 * @return bool   True on success, false on failure.
 	 */
 	public function validate_authentication( $user ) {
-		return $this->validate_code( $user, $_POST['two-factor-backup-code'] );
+		return $this->validate_code( $user, $_POST['two_factor-backup_code'] );
 	}
 
 	/**
@@ -360,8 +356,8 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 		$backup_codes = array_values( array_flip( $backup_codes ) );
 
 		// Update the backup code master list.
-		return update_user_meta( $user->ID, self::BACKUP_CODES_META_KEY, $backup_codes );
-		// return delete_user_meta( $user->ID, self::BACKUP_CODES_META_KEY, $backup_codes[ $code_hashed ] );
+		// return update_user_meta( $user->ID, self::BACKUP_CODES_META_KEY, $backup_codes );
+		return delete_user_meta( $user->ID, self::BACKUP_CODES_META_KEY, $backup_codes[ $code_hashed ] );
 	}
 
 	/**
