@@ -42,11 +42,10 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	protected function __construct() {
 		$this->priority = 40;
 
-		add_action( 'admin_enqueue_scripts',       					array( $this, 'enqueue_assets' ) );
 		add_action( 'admin_notices', 								array( $this, 'admin_notices' ) );
 		add_action( 'personal_options_update',              		array( $this, 'user_options_update' ) );
 		add_action( 'edit_user_profile_update',             		array( $this, 'user_options_update' ) );
-		add_action( 'two_factor_user_options-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
+		add_action( 'two_factor_user_option-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
 		add_action( 'two_factor_user_option_details-' . __CLASS__, 	array( $this, 'print_user_option_details' ) );
 
 		return parent::__construct();
@@ -64,27 +63,12 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	}
 
 	/**
-	 * Enqueue assets.
-	 *
-	 * @since 0.2-dev
-	 *
-	 * @param string $hook Current page.
-	 */
-	public static function enqueue_assets( $hook ) {
-		if ( ! in_array( $hook, array( 'user-edit.php', 'profile.php' ) ) ) {
-			return;
-		}
-
-		wp_enqueue_script( 'totp-options', plugins_url( 'js/totp-options.js', __FILE__ ), array( 'jquery' ), null, true );
-	}
-
-	/**
 	 * Returns the name of the provider.
 	 * 
 	 * @since 0.1-dev
 	 */
 	public function get_label() {
-		return _x( 'Authenticator App', 'Provider Label' );
+		return _x( 'Authenticator App', 'time-based one-time password phone application', 'two-factor' );
 	}
 
 	/**
@@ -93,7 +77,7 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	 * @since 0.2-dev
 	 */
 	public function get_description() {
-		return _x( 'Use an Authentication App on your phone that will generate time-synchronized codes for your account.', 'Two-Factor Authentication Method Description' );
+		return _x( 'Use an Authentication App on your phone that will generate time-synchronized codes for your account.', 'Two-factor web authentication', 'two-factor' );
 	}
 
 	/**
@@ -114,16 +98,26 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 		if ( empty( $key ) ) {
 			$key = $this->generate_key();
 			$site_name = get_bloginfo( 'name', 'display' );
+
 			?>
-			<div id="two_factor-totp-options" class="two-factor-options two-factor-toggle hide-if-js">
-				<img src="<?php echo esc_url( $this->get_google_qr_code( $site_name . ':' . $user->user_login, $key, $site_name ) ); ?>" id="two_factor-totp_qrcode" />
-				<p><strong><?php echo esc_html( $key ); ?></strong></p>
-				<p><?php esc_html_e( 'Scan the QR code or use the provided key. Optionally, you can give an authentication code from your app.' ); ?></p>
-				<p>
-					<label for="two_factor-totp_authcode"><?php esc_html_e( 'Authentication Code:' ); ?></label>
-					<input type="hidden" name="two_factor-totp_key" value="<?php echo esc_attr( $key ) ?>" />
-					<input type="tel" name="two_factor-totp_authcode" id="two_factor-totp_authcode" class="input" value="" size="20" pattern="[0-9]*" />
+			<div class="two-factor-flex-wrap">
+				<div class="two-factor-flex-imgwrap">
+					<div><img src="<?php echo esc_url( $this->get_google_qr_code( $site_name . ':' . $user->user_login, $key, $site_name ) ); ?>" id="two_factor-totp_qrcode"/></div>
+				</div>
+				<p><?php esc_html_e( 'Scan the QR code above using your two-factor authentication app.' ); ?></p>
+				<p>If you can't use a QR code, <a href="#" id="two_factor-totp_show_authcode">enter this code</a>.</p>
+				<div class="two-factor-flex-miniwrap hide-if-js">
+					<p><strong><?php esc_html_e( $key ); ?></strong></p>
+				</div>
+				<div class="two-factor-flex-miniwrap">
+				<label for="two_factor-totp_authcode"><?php esc_html_e( 'Enter the 6-digit code that the app generates.' ); ?></label>
+				</div>
+				<div class="two-factor-flex-miniwrap">
+				<input type="tel" name="two_factor-totp_authcode" id="two_factor-totp_authcode" class="input" value="" placeholder="123456" size="20" pattern="[0-9]*" />
+				<input type="hidden" name="two_factor-totp_key" value="<?php esc_attr_e( $key ) ?>" />
+				<button type="button" class="button button-secondary two-factor two-factor-submit hide-if-no-js"><?php _e( 'Enable' ); ?></button>
 				</p>
+				</div>
 			</div>
 			<?php
 		}
@@ -141,10 +135,14 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 			return false;
 		}
 
-		$site_name = get_bloginfo( 'name', 'display' );
-		$message = esc_html__( $site_name . ':' . $user->user_login );
+		$key = get_user_meta( $user->ID, self::SECRET_META_KEY, true );
 
-		_e( sprintf( '<p>Account Tag: <strong>%1$s</strong></p>', $message ) );
+		if ( ! empty( $key ) ) {
+			$site_name = get_bloginfo( 'name', 'display' );
+			$message = esc_html__( $site_name . ':' . $user->user_login );
+
+			_e( sprintf( '<p>Account Tag: <strong>%1$s</strong></p>', $message ) );
+		}
 	}
 
 	/**

@@ -42,7 +42,7 @@ abstract class Two_Factor_Provider {
 			return;
 		}
 
-		wp_enqueue_script( 'two-factor-js', plugins_url( 'js/two-factor-provider.js', __FILE__ ), array( 'jquery' ), null, true );
+		wp_enqueue_script( 'two-factor-js', plugins_url( 'js/two-factor-provider.js', __FILE__ ), array( 'jquery', 'u2f-api' ), null, true );
 	}
 
 	/**

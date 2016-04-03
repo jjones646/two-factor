@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  *
  * @package Two_Factor
  */
-class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
+class Two_Factor_U2F extends Two_Factor_Provider {
 
 	/**
 	 * The U2F library interface object.
@@ -51,8 +51,8 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 		require_once( TWO_FACTOR_DIR . 'vendor/autoload.php' );
 		self::$u2f = new u2flib_server\U2F( $app_url );
 
-		require_once( TWO_FACTOR_DIR . 'providers/class-two-factor-fido-u2f-admin.php' );
-		Two_Factor_FIDO_U2F_Admin::add_hooks( __CLASS__ );
+		require_once( TWO_FACTOR_DIR . 'providers/class-two-factor-u2f-admin.php' );
+		Two_Factor_U2F_Admin::add_hooks( __CLASS__ );
 
 		add_action( 'admin_notices', 								array( $this, 'admin_notices' ) );
 		add_action( 'login_enqueue_scripts',                		array( $this, 'login_enqueue_assets' ) );
@@ -77,7 +77,7 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 	}
 
 	/**
-	 * Displays an admin notice when email is disabled and no other two-factor methods are available.
+	 * Displays an admin notice when disabled and no other two-factor methods are available.
 	 *
 	 * @since 0.2-dev
 	 */
@@ -105,7 +105,10 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 	 * @since 0.1-dev
 	 */
 	public function login_enqueue_assets() {
-		wp_enqueue_script( 'u2f-api',        plugins_url( 'includes/u2f/u2f-api.js', __FILE__ ), null, null, true );
+		wp_enqueue_script( 'u2f-api', plugins_url( 'includes/u2f/u2f-api.js', __FILE__ ), null, null, true );
+
+		// register the script
+		wp_register_script( 'two_factor-u2f_login-js', plugins_url( 'js/u2f-login.js', __FILE__ ), array( 'jquery', 'u2f-api' ), null, true );
 	}
 
 	/**
@@ -114,7 +117,7 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 	 * @since 0.1-dev
 	 */
 	public function get_label() {
-		return _x( 'Security Keys', 'Provider Label' );
+		return _x( 'Security Keys', 'abstract noun', 'two-factor' );
 	}
 
 	/**
@@ -123,7 +126,7 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 	 * @since 0.2-dev
 	 */
 	public function get_description() {
-		return _x( 'Use a hardware device compatible with the U2F protocol for 2-Step authentication during sign-in.', 'Two-Factor Authentication Method Description' );
+		return _x( 'Use a hardware device compatible with the U2F protocol for 2-Step authentication during sign-in.', 'two-factor authentication hardware device', 'two-factor' );
 	}
 
 	/**
@@ -140,6 +143,19 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 			$keys = self::get_security_keys( $user->ID );
 			$data = self::$u2f->getAuthenticateData( $keys );
 			update_user_meta( $user->ID, self::AUTH_DATA_USER_META_KEY, $data );
+
+			// add the localized data for the js
+			$js_data = array(
+				'request' => wp_json_encode( $data ),
+				'text' => array(
+					'insert' => esc_html__( 'Insert and/or tap your Security Key.', 'two_factor' ),
+					'error' => esc_html__( 'Sign-in failure.', 'two-factor' ),
+				),
+			);
+			wp_localize_script( 'two_factor-u2f_login-js', 'u2fL10n', $js_data );
+			// enqueued script with localized data
+			wp_enqueue_script( 'two_factor-u2f_login-js' );
+
 		} catch ( Exception $e ) {
 			?>
 			<p><?php esc_html_e( 'An error occurred while creating authentication data.' ); ?></p>
@@ -148,12 +164,7 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 		}
 		?>
 		<p><?php esc_html_e( 'Insert and/or tap your Security Key.' ); ?></p>
-		<input type="hidden" name="u2f_response" id="u2f_response" />
-		<script>
-			u2fL10n = <?php echo wp_json_encode( array(
-				'request' => $data,
-			) ); ?>;
-		</script>
+		<input type="hidden" name="u2f_response" id="u2f_response">
 		<?php
 	}
 
@@ -186,7 +197,7 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 	}
 
 	/**
-	 * Whether this Two-Factor provider is configured and available for the user specified.
+	 * Whether this two-factor provider is configured and available for the user specified.
 	 *
 	 * @since 0.1-dev
 	 *
@@ -226,11 +237,15 @@ class Two_Factor_FIDO_U2F extends Two_Factor_Provider {
 		$message = '';
 
 		if ( $num_keys ) {
-			$message = esc_html__( 'You currently have' ) . __( sprintf( __( ' <strong>%u</strong> ' ), $num_keys ) ) . esc_html__( 'Security ' . _n( 'Key', 'Keys', $num_keys ) . ' registered' );
+			$message = esc_html__( 'You currently have' ) . __( sprintf( __( ' <strong>%u</strong> ' ), $num_keys ) ) . esc_html__( 'Security ' . _n( 'Key', 'Keys', $num_keys ) . ' registered.' );
 		} else {
-			$message = esc_html__( 'You have not registered any Security Keys' );
+			$message = esc_html__( 'You have not registered any Security Keys.' );
 		}
 
+		if ( ! is_ssl() ) {
+			$message .= __( ' <strong>' . esc_html_e( 'Using Security Keys requires an https connection.' ) . '</strong>' );
+		}
+		
 		_e( sprintf( '<p>%1$s</p>', $message ) );
 	}
 

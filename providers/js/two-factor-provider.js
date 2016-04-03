@@ -1,10 +1,10 @@
 /* global  u2fL10n */
 (function($) {
-    $('button.two-factor-register.two-factor-fido-u2f').click(function() {
+    $('button.two-factor-register.two-factor-u2f').click(function() {
         if ($(this).hasClass('clicked')) {
             return false;
         }
-        $(this).addClass('clicked');
+        $(this).addClass('clicked').addClass('disabled');
 
         var _this = $(this);
         var btnTxt = $(this).text();
@@ -31,31 +31,40 @@
                 // See: http://stackoverflow.com/questions/833032/submit-is-not-a-function-error-in-javascript
                 $('<form>')[0].submit.call($('#your-profile')[0]);
             });
-        }, $(this)), 1000);
+        }, $(this)), 5000);
     });
 
-    $('button.two-factor-toggle.two-factor').click(function() {
-        $(this).prop('disabled', true);
-        $('td > .two-factor-toggle').slideUp(125, function() {
-            $('td > div.two-factor-toggle').slideDown();
+    // Slide toggle for the 2-Step Verification enable button on user profile page
+    $('td button.two-factor.two-factor-toggle').click(function() {
+        var elems = $(this).siblings('.two-factor.two-factor-toggle');
+        $(this).toggleClass('clicked');
+
+        elems.filter('p').add($(this)).slideUp(250, function() {
+            elems.filter('div').slideDown();
         });
     });
 
-    $('.two-factor-table .two-factor-option a').click(function(e) {
+    // Slide toggle for the interactions for each row in the table on user profile page
+    $('.two-factor-table .two-factor-option a[href="#"]').click(function(e) {
         // stop the default action on the href link
         e.preventDefault();
-
+        // select the appropiate section to slide in/out of view
         var elem = $(this).closest('td').siblings('td');
-        // console.log(elem);
         elem = elem.find('div.two-factor-options.two-factor-toggle');
-        // console.log(elem);
         elem.slideToggle();
     });
 
-    $('button.two-factor-toggle.two-factor-fido-u2f').click(function() {
-        var e = $(this).closest('div.two-factor-toggle.two-factor-wrap').children('div.two-factor-toggle:last-child')
-
-        $(this).toggleClass('clicked');
-        e.slideToggle();
+    $('#two_factor-totp_show_authcode').click(function(e) {
+        // stop the default action on the href link
+        e.preventDefault();
+        // select the element that we'll unhide
+        var elem = $(this).closest('.two-factor-flex-wrap').children('div');
+        elem.filter('.hide-if-js').slideToggle();
     });
+
+    $('button.two-factor.two-factor-submit').click(function(){
+        // stop the default action
+        e.preventDefault();
+    });
+
 })(jQuery);

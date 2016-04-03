@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 // Load the parent class if it doesn't exist.
 if ( ! class_exists( 'WP_List_Table' ) ) {
-	require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+	require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 }
 
 /**
@@ -16,7 +16,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
  *
  * @package Two_Factor
  */
-class Two_Factor_FIDO_U2F_Admin_List_Table extends WP_List_Table {
+class Two_Factor_U2F_User_List_Table extends WP_List_Table {
 
 	/**
 	 * Get a list of columns.
@@ -59,8 +59,8 @@ class Two_Factor_FIDO_U2F_Admin_List_Table extends WP_List_Table {
 				$out .= '</div>';
 
 				$actions = array(
-					'rename hide-if-no-js' => Two_Factor_FIDO_U2F_Admin::rename_link( $item ),
-					'delete' => Two_Factor_FIDO_U2F_Admin::delete_link( $item ),
+					'rename hide-if-no-js' => Two_Factor_U2F_Admin::rename_link( $item ),
+					'delete' => Two_Factor_U2F_Admin::delete_link( $item ),
 				);
 
 				return esc_html( $item->name ) . $out . self::row_actions( $actions );
@@ -92,7 +92,7 @@ class Two_Factor_FIDO_U2F_Admin_List_Table extends WP_List_Table {
 	 * @return array List of CSS classes for the table tag.
 	 */
 	protected function get_table_classes() {
-		return array( $this->_args['plural'] );
+		return array( 'two-factor-table', $this->_args['plural'] );
 	}
 
 	/**
@@ -109,24 +109,22 @@ class Two_Factor_FIDO_U2F_Admin_List_Table extends WP_List_Table {
 		?>
 		<table class="wp-list-table <?php echo implode( ' ', $this->get_table_classes() ); ?>">
 			<thead>
-			<tr>
-				<?php $this->print_column_headers(); ?>
-			</tr>
+				<tr>
+					<?php $this->print_column_headers(); ?>
+				</tr>
 			</thead>
-	
 			<tbody id="the-list"<?php
 				if ( $singular ) {
 					echo " data-wp-lists='list:$singular'";
 				} ?>>
 				<?php $this->display_rows_or_placeholder(); ?>
 			</tbody>
-	
 			<tfoot>
-			<tr>
-			</tr>
+				<tr></tr>
 			</tfoot>
 		</table>
 		<?php
+
 		$this->display_tablenav( 'bottom' );
 	}
 
@@ -165,18 +163,20 @@ class Two_Factor_FIDO_U2F_Admin_List_Table extends WP_List_Table {
 									<span class="input-text-wrap"><input type="text" name="name" class="ptitle" value="" /></span>
 								</label>
 							</div>
-						</fieldset>
-						<?php
+						</fieldset><?php
+
 						$core_columns = array( 'name' => true, 'added' => true, 'last_used' => true );
 						list( $columns ) = $this->get_column_info();
 						foreach ( $columns as $column_name => $column_display_name ) {
 							if ( isset( $core_columns[ $column_name ] ) ) {
 								continue;
 							}
-
-							/** This action is documented in wp-admin/includes/class-wp-posts-list-table.php */
+							/**
+							 *  This action is documented in 'wp-admin/includes/class-wp-posts-list-table.php'
+							 */
 							do_action( 'quick_edit_custom_box', $column_name, 'edit-security-keys' );
 						}
+
 						?>
 						<p class="inline-edit-save submit">
 							<a href="#inline-edit" class="cancel button-secondary alignleft"><?php esc_html_e( 'Cancel' ); ?></a>

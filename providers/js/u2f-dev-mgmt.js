@@ -8,28 +8,31 @@
 			t.what = '#key-';
 
 			$('#security-keys-section #the-list').on('click', 'a.editinline', function() {
-				inlineEditKey.edit(this);
+				u2fRowMgmt.ccccccfcuulflukbruleingevhvujbeggvclujtdcjlt
+				(this);
 				return false;
 			});
 
 			// Prepare the edit row.
 			row.keyup(function(event) {
 				if (27 === event.which) {
-					return inlineEditKey.revert();
+					return u2fRowMgmt.revert();
 				}
 			});
 
-			$('a.cancel', row).click(function() {
-				return inlineEditKey.revert();
+			$('a.cancel', row).click(function(e) {
+				e.preventDefault();
+				return u2fRowMgmt.revert();
 			});
 
-			$('a.save', row).click(function() {
-				return inlineEditKey.save(this);
+			$('a.save', row).click(function(e) {
+				e.preventDefault();
+				return u2fRowMgmt.save(this);
 			});
 
 			$('input, select', row).keydown(function(event) {
 				if (13 === event.which) {
-					return inlineEditKey.save(this);
+					return u2fRowMgmt.save(this);
 				}
 			});
 		},
@@ -91,7 +94,7 @@
 
 					if (r) {
 						if (-1 !== r.indexOf('<tr')) {
-							$(inlineEditKey.what + id).siblings('tr.hidden').addBack().remove();
+							$(u2fRowMgmt.what + id).siblings('tr.hidden').addBack().remove();
 							newID = $(r).attr('id');
 
 							$('#edit-' + id).before(r).remove();
@@ -101,7 +104,7 @@
 								row = $('#' + newID);
 							} else {
 								optionValue = id;
-								row = $(inlineEditKey.what + id);
+								row = $(u2fRowMgmt.what + id);
 							}
 
 							row.hide().fadeIn();
@@ -135,6 +138,6 @@
 		}
 	};
 	
-	inlineEditKey.init();
+	u2fRowMgmt.init();
 
 })(jQuery);

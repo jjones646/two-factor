@@ -12,18 +12,9 @@
     }
 }
 
-.application-passwords tfoot {
-	display: none;
-}
-
 .two-factor-provider-label {
 	margin: 0;
 	line-height: 1;
-}
-
-.application-passwords table,
-.security-keys table {
-	margin: 1em 0;
 }
 
 .form-table .two-factor-table th {
@@ -45,6 +36,54 @@ div.two-factor-details > p {
 .two-factor-column-details {
     font-style: italic;
     margin-bottom: .2em;
+}
+
+.two-factor-flex-wrap {
+    display: flex;
+    -webkit-flex-flow: row wrap;
+    flex-flow: row wrap;
+}
+
+.two-factor-flex-wrap > * {
+    /*padding: 10px;*/
+    flex: 1 100%;
+}
+
+.two-factor-flex-miniwrap {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.6em 0em;
+}
+
+.two-factor-flex-miniwrap > div {
+    margin:1em;
+}
+
+.two-factor-flex-imgwrap {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 1.3em;
+}
+
+.two-factor-flex-imgwrap > div {
+    margin:1em;
+}
+
+.two-factor-flex-miniwrap input {
+    width: 75%;
+}
+
+p + div.two-factor-flex-miniwrap {
+    padding: 1.5em 0em;
+}
+
+#two_factor-totp_authcode input {
+    width: 75%;
+}
+
+.two-factor-submit button {
+    width: 25%;
 }
 
 span.setup a {

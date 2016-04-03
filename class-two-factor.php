@@ -22,13 +22,6 @@ class Two_Factor {
 	const ENABLED_PROVIDERS_KEY = 'two_factor-providers';
 
 	/**
-	 * The user meta provider key.
-	 *
-	 * @type string
-	 */
-	const PROVIDER_USER_META_KEY = 'two_factor-provider';
-
-	/**
 	 * The user meta enabled providers key.
 	 *
 	 * @type string
@@ -59,14 +52,16 @@ class Two_Factor {
 
 		add_action( 'admin_init', 				  array( __CLASS__, 'add_settings_general' ) );
 
-		add_action( 'show_user_profile',          array( __CLASS__, 'user_two_factor_options' ) );
-		add_action( 'edit_user_profile',          array( __CLASS__, 'user_two_factor_options' ) );
-
+		add_action( 'edit_user_profile',          array( __CLASS__, 'user_two_factor_options' ), 20 );
+		add_action( 'show_user_profile',          array( __CLASS__, 'user_two_factor_options' ), 20 );
+		
+		add_action( 'init',           			  array( __CLASS__, 'user_two_factor_options_update' ), 30 );
 		add_action( 'personal_options_update',    array( __CLASS__, 'user_two_factor_options_update' ) );
 		add_action( 'edit_user_profile_update',   array( __CLASS__, 'user_two_factor_options_update' ) );
 
 		add_filter( 'manage_users_columns',       array( __CLASS__, 'filter_manage_users_columns' ) );
 		add_filter( 'manage_users_custom_column', array( __CLASS__, 'manage_users_custom_column' ), 10, 3 );
+		add_filter( 'removable_query_args', 	  array( __CLASS__, 'add_filterable_params' ) );
 	}
 
 	/**
@@ -83,9 +78,9 @@ class Two_Factor {
 		 * adding it here directly.
 		 */
 		$providers = array(
-			'Two_Factor_Email'        => TWO_FACTOR_DIR . 'providers/class-two-factor-email.php',
+			'Two_Factor_U2F'     	  => TWO_FACTOR_DIR . 'providers/class-two-factor-u2f.php',
 			'Two_Factor_Totp'         => TWO_FACTOR_DIR . 'providers/class-two-factor-totp.php',
-			'Two_Factor_FIDO_U2F'     => TWO_FACTOR_DIR . 'providers/class-two-factor-fido-u2f.php',
+			'Two_Factor_Email'        => TWO_FACTOR_DIR . 'providers/class-two-factor-email.php',
 			'Two_Factor_Backup_Codes' => TWO_FACTOR_DIR . 'providers/class-two-factor-backup-codes.php'
 		);
 
@@ -193,9 +188,14 @@ class Two_Factor {
 			$providers = array();
 		}
 
-		return array_filter( self::get_providers(), function ( $p ) use ( $providers ) {
-			return in_array( $p['name'], $providers );
+		$providers_can_use = array_filter( self::get_providers(), function ( $p ) use ( $providers ) {
+			return in_array( $p['key'], $providers );
 		} );
+
+		if ( empty( $providers_can_use ) ) {
+			return array();
+		}
+		return $providers_can_use;
 	}
 
 	/**
@@ -239,18 +239,8 @@ class Two_Factor {
 		// If there's only one available provider, force that to be the primary.
 		if ( empty( $providers ) ) {
 			return null;
-		} elseif ( 1 === count( $providers ) ) {
-			$provider = $providers[0];
 		} else {
-			$provider_name = get_user_meta( $user_id, self::PROVIDER_USER_META_KEY, true );
-
-			$provider = array_filter( $providers, function($p) { return strcmp( $p['name'], $provider_name ); } );
-
-			if ( empty( $provider ) ) {
-				$provider = $providers[0];
-			} else {
-				$provider = $provider[0];
-			}
+			$provider = $providers[0];
 		}
 
 		/**
@@ -261,8 +251,8 @@ class Two_Factor {
 		 */
 		$provider = apply_filters( 'two_factor_primary_provider_for_user', $provider, $user_id );
 
-		if ( isset( $provider['obj'] ) ) {
-			return $provider['obj'];
+		if ( isset( $provider ) ) {
+			return $provider;
 		}
 		return null;
 	}
@@ -319,40 +309,40 @@ class Two_Factor {
 		self::login_html( $user, $login_nonce['key'], $redirect_to );
 	}
 
-	/**
-	 * Add short description. @todo
-	 *
-	 * @since 0.1-dev
-	 */
-	public static function backup_2fa() {
-		if ( ! isset( $_GET['wp-auth-id'], $_GET['wp-auth-nonce'], $_GET['provider'] ) ) {
-			return;
-		}
+	// /**
+	//  * Add short description. @todo
+	//  *
+	//  * @since 0.1-dev
+	//  */
+	// public static function backup_2fa() {
+	// 	if ( ! isset( $_GET['wp-auth-id'], $_GET['wp-auth-nonce'], $_GET['provider'] ) ) {
+	// 		return;
+	// 	}
 
-		$user = get_userdata( $_GET['wp-auth-id'] );
-		if ( ! $user ) {
-			return;
-		}
+	// 	$user = get_userdata( $_GET['wp-auth-id'] );
+	// 	if ( ! $user ) {
+	// 		return;
+	// 	}
 
-		$nonce = $_GET['wp-auth-nonce'];
-		if ( true !== self::verify_login_nonce( $user->ID, $nonce ) ) {
-			wp_safe_redirect( get_bloginfo( 'url' ) );
-			exit;
-		}
+	// 	$nonce = $_GET['wp-auth-nonce'];
+	// 	if ( true !== self::verify_login_nonce( $user->ID, $nonce ) ) {
+	// 		wp_safe_redirect( get_bloginfo( 'url' ) );
+	// 		exit;
+	// 	}
 
-		$providers = self::get_available_providers_for_user( $user );
-		if ( isset( $providers[ $_GET['provider'] ] ) ) {
-			$provider = $providers[ $_GET['provider'] ];
-		} else {
-			wp_die( esc_html__( 'Cheatin&#8217; uh?' ), 403 );
-		}
+	// 	$providers = self::get_available_providers_for_user( $user );
+	// 	if ( isset( $providers[ $_GET['provider'] ] ) ) {
+	// 		$provider = $providers[ $_GET['provider'] ];
+	// 	} else {
+	// 		wp_die( esc_html__( 'Cheatin&#8217; uh?' ), 403 );
+	// 	}
 
-		wp_enqueue_style( 'two-factor-login', plugins_url( 'providers/css/two-factor-login.css', __FILE__ ) );
+	// 	wp_enqueue_style( 'two-factor-login', plugins_url( 'providers/css/two-factor-login.css', __FILE__ ) );
 
-		self::login_html( $user, $_GET['wp-auth-nonce'], $_GET['redirect_to'], '', $provider );
+	// 	self::login_html( $user, $_GET['wp-auth-nonce'], $_GET['redirect_to'], '', $provider );
 
-		exit;
-	}
+	// 	exit;
+	// }
 
 	/**
 	 * Generates the html form for the second step of the authentication process.
@@ -368,13 +358,14 @@ class Two_Factor {
 	public static function login_html( $user, $login_nonce, $redirect_to, $error_msg = '', $provider = null ) {
 		if ( empty( $provider ) ) {
 			$provider = self::get_primary_provider_for_user( $user->ID );
-		} elseif ( is_string( $provider ) && method_exists( $provider, 'get_instance' ) ) {
-			$provider = call_user_func( array( $provider, 'get_instance' ) );
 		}
 
-		$provider_class = get_class( $provider );
 		$available_providers = self::get_available_providers_for_user( $user );
-		$backup_providers = array_diff_key( $available_providers, array( $provider_class => null ) );
+		if ( 1 < count( $available_providers ) ) {
+			$backup_provider = $available_providers[1];	
+		}
+
+		$provider_key = $provider['key'];
 
 		$interim_login = isset( $_REQUEST['interim-login'] ); // WPCS: override ok.
 
@@ -391,30 +382,25 @@ class Two_Factor {
 		}
 
 		login_header();
-
 		if ( ! empty( $error_msg ) ) {
 			echo '<div id="login_error"><strong>' . esc_html( $error_msg ) . '</strong><br /></div>';
 		}
-		?>
 
+		?>
 		<form name="validate_2fa_form" id="loginform" action="<?php echo esc_url( set_url_scheme( add_query_arg( 'action', 'validate_2fa', $wp_login_url ), 'login_post' ) ); ?>" method="post" autocomplete="off">
-				<input type="hidden" name="provider"      id="provider"      value="<?php echo esc_attr( $provider_class ); ?>" />
+				<input type="hidden" name="provider"      id="provider"      value="<?php echo esc_attr( $provider_key ); ?>" />
 				<input type="hidden" name="wp-auth-id"    id="wp-auth-id"    value="<?php echo esc_attr( $user->ID ); ?>" />
 				<input type="hidden" name="wp-auth-nonce" id="wp-auth-nonce" value="<?php echo esc_attr( $login_nonce ); ?>" />
-				<?php   if ( $interim_login ) { ?>
+				<?php if ( $interim_login ) : ?>
 					<input type="hidden" name="interim-login" value="1" />
-				<?php   } else { ?>
+				<?php else : ?>
 					<input type="hidden" name="redirect_to" value="<?php echo esc_attr( $redirect_to ); ?>" />
-				<?php   } ?>
+				<?php endif; ?>
 				<input type="hidden" name="rememberme"    id="rememberme"    value="<?php echo esc_attr( $rememberme ); ?>" />
-
-				<?php $provider->authentication_page( $user ); ?>
+				<?php $provider['obj']->authentication_page( $user ); ?>
 		</form>
 
-		<?php if ( 1 === count( $backup_providers ) ) :
-			$backup_classname = key( $backup_providers );
-			$backup_provider  = $backup_providers[ $backup_classname ];
-			?>
+		<?php if ( isset( $backup_provider ) ) : ?>
 			<div class="backup-methods-wrap">
 				<p class="backup-methods"><a href="<?php echo esc_url( add_query_arg( urlencode_deep( array(
 					'action'        => 'backup_2fa',
@@ -423,23 +409,7 @@ class Two_Factor {
 					'wp-auth-nonce' => $login_nonce,
 					'redirect_to'   => $redirect_to,
 					'rememberme'    => $rememberme,
-				) ), $wp_login_url ) ); ?>"><?php echo esc_html( sprintf( __( 'Or, use your backup method: %s &rarr;', 'two-factor' ), $backup_provider->get_label() ) ); ?></a></p>
-			</div>
-		<?php elseif ( 1 < count( $backup_providers ) ) : ?>
-			<div class="backup-methods-wrap">
-				<p class="backup-methods"><a href="javascript:;" onclick="document.querySelector('ul.backup-methods').style.display = 'block';"><?php esc_html_e( 'Or, use a backup method.', 'two-factor' ); ?></a></p>
-				<ul class="backup-methods">
-					<?php foreach ( $backup_providers as $backup_classname => $backup_provider ) : ?>
-						<li><a href="<?php echo esc_url( add_query_arg( urlencode_deep( array(
-							'action'        => 'backup_2fa',
-							'provider'      => $backup_classname,
-							'wp-auth-id'    => $user->ID,
-							'wp-auth-nonce' => $login_nonce,
-							'redirect_to'   => $redirect_to,
-							'rememberme'    => $rememberme,
-						) ), $wp_login_url ) ); ?>"><?php $backup_provider->print_label(); ?></a></li>
-					<?php endforeach; ?>
-				</ul>
+				) ), $wp_login_url ) ); ?>"><?php esc_html_e( sprintf( __( 'Or, use your backup method: %1$s &rarr;', 'two-factor' ), $backup_provider['obj']->get_label() ) ); ?></a></p>
 			</div>
 		<?php endif; ?>
 
@@ -465,7 +435,7 @@ class Two_Factor {
 	public static function create_login_nonce( $user_id ) {
 		$login_nonce               = array();
 		$login_nonce['key']        = wp_hash( $user_id . mt_rand() . microtime(), 'nonce' );
-		$login_nonce['expiration'] = time() + HOUR_IN_SECONDS;
+		$login_nonce['expiration'] = time() + MINUTE_IN_SECONDS;
 
 		if ( ! update_user_meta( $user_id, self::USER_META_NONCE_KEY, $login_nonce ) ) {
 			return false;
@@ -498,11 +468,13 @@ class Two_Factor {
 			return false;
 		}
 
+		$ret = true;
 		if ( $nonce !== $login_nonce['key'] || time() > $login_nonce['expiration'] ) {
-			self::delete_login_nonce( $user_id );
-			return false;
+			$ret = false;
 		}
-		return true;
+
+		self::delete_login_nonce( $user_id );
+		return $ret;
 	}
 
 	/**
@@ -527,17 +499,25 @@ class Two_Factor {
 		}
 
 		if ( isset( $_POST['provider'] ) ) {
-			$providers = self::get_available_providers_for_user( $user );
-			if ( isset( $providers[ $_POST['provider'] ] ) ) {
-				$provider = $providers[ $_POST['provider'] ];
+			$provider_key = $_POST[ 'provider' ];
+			$provider = array_filter( self::get_available_providers_for_user( $user ), function( $p ) use ( $provider_key ) {
+							return strcasecmp( $p['key'], $provider_key );
+						} );
+
+			if ( isset( $provider ) ) {
+				$provider = $provider[0];
+				
 			} else {
-				wp_die( esc_html__( 'Cheatin&#8217; uh?' ), 403 );
+				wp_die( var_dump( $provider ) );
+				wp_die( esc_html__( 'Invalid two-factor provider.' ), 403 );
 			}
+
 		} else {
 			$provider = self::get_primary_provider_for_user( $user->ID );
+			wp_die( var_dump( $provider ) );
 		}
 
-		if ( true !== $provider->validate_authentication( $user ) ) {
+		if ( true !== $provider['obj']->validate_authentication( $user ) ) {
 			do_action( 'wp_login_failed', $user->user_login );
 
 			$login_nonce = self::create_login_nonce( $user->ID );
@@ -545,11 +525,9 @@ class Two_Factor {
 				return;
 			}
 
-			self::login_html( $user, $login_nonce['key'], $_REQUEST['redirect_to'], esc_html__( 'ERROR: Invalid verification code.' ), $provider );
+			self::login_html( $user, $login_nonce['key'], $_REQUEST['redirect_to'], esc_html__( 'ERROR: Invalid verification code.' ), $provider['obj'] );
 			exit;
 		}
-
-		self::delete_login_nonce( $user->ID );
 
 		$rememberme = isset( $_REQUEST['rememberme'] ) && (bool) $_REQUEST['rememberme'];
 		wp_set_auth_cookie( $user->ID, $rememberme );
@@ -590,7 +568,7 @@ class Two_Factor {
 	 * @return array          Updated array of columns.
 	 */
 	public static function filter_manage_users_columns( array $columns ) {
-		$columns['two-factor'] = __( 'Two-Factor' );
+		$columns['two_factor'] = __( 'Two-factor' );
 		return $columns;
 	}
 
@@ -603,7 +581,7 @@ class Two_Factor {
 	 * @return string              The column output.
 	 */
 	public static function manage_users_custom_column( $output, $column_name, $user_id ) {
-		if ( 'two-factor' !== $column_name ) {
+		if ( 'two_factor' !== $column_name ) {
 			return $output;
 		}
 
@@ -614,8 +592,6 @@ class Two_Factor {
 			return esc_html( $provider->get_label() );
 		}
 	}
-
-	// update_usermeta( absint( $user_id ), 'twitter', wp_kses_post( $_POST['twitter'] ) );
 
 	/**
 	 * Adds settings to 'WP-Admin -> Settings -> General' page
@@ -652,8 +628,10 @@ class Two_Factor {
 		}
 		wp_enqueue_style( 'two-factor', plugins_url( 'providers/css/two-factor.css', __FILE__ ) );
 
-		$enabled_providers = self::get_available_providers_for_user();
-		$two_factor_disabled = empty( $enabled_providers );
+		$user_providers = array_map( function($p) { return $p['key']; }, self::get_enabled_providers_for_user() );
+		$two_factor_disabled = empty( $user_providers );
+
+		$configured_providers = self::get_available_providers_for_user();
 
 		?>
 		<h2><?php _e( 'Sign-in Methods' ); ?></h2>
@@ -665,12 +643,12 @@ class Two_Factor {
 
 		if ( $two_factor_disabled ) {
 			// Because get_user_meta() has no way of providing a def
-			$enabled_providers = array();
+			$configured_providers = array();
 
 			?>
 			<input class="hidden" value=" "><!-- #24364 workaround -->
 			<button type="button" class="button button-secondary two-factor two-factor-toggle hide-if-no-js"><?php _e( 'Enable 2-Step Verification' ); ?></button>
-			<p class="description two-factor-toggle"><?php _e('Add a second layer of protection with 2-Step Verification, which requires a single-use code when you sign in.'); ?></p>
+			<p class="description two-factor two-factor-toggle"><?php _e('Add a second layer of protection with 2-Step Verification, which requires a single-use code when you sign in.'); ?></p>
 			<div class="two-factor two-factor-toggle hide-if-js">
 			<?php
 		} else {
@@ -678,13 +656,12 @@ class Two_Factor {
 		} 
 
 		$primary_provider = self::get_primary_provider_for_user( $user->ID );
-		wp_nonce_field( 'user_two_factor_options', '_nonce_user_two_factor_options', false );
+		wp_nonce_field( 'two_factor_options_update', 'two_factor_nonce' );
 
-		if ( $two_factor_disabled ) {
-			?>
-			<input type="hidden" name="<?php echo esc_attr( self::ENABLED_PROVIDERS_USER_META_KEY ); ?>[]" value="<?php /* Dummy input so $_POST value is passed when no providers are enabled. */ ?>"/>
-			<?php
-		}
+		// if ( $two_factor_disabled ) {
+		// 	// dummy input so post request key will still be submitted with the form
+		// 	_e( '<input type="hidden" name="' . __( esc_attr( self::ENABLED_PROVIDERS_USER_META_KEY ) ) . '[]" value="35gin234t"/>' );
+		// }
 
 		?>
 		<table class="wp-list-table widefat two-factor-table plugins">
@@ -699,7 +676,7 @@ class Two_Factor {
 			</thead>
 			<tbody id="the-list">
 			<?php foreach ( self::get_providers() as $provider ) : ?>
-				<?php if ( $provider['obj']->is_available_for_user( $user ) ) : ?>
+				<?php if ( in_array( $provider['key'], $user_providers ) ) : ?>
 				<tr class="active">
 				<?php else : ?>
 				<tr class="inactive">
@@ -710,39 +687,55 @@ class Two_Factor {
 					</th>
 					<td class="plugin-title column-primary"><strong><?php $provider['obj']->print_label(); ?></strong>
 						<div class="row-actions visible">
-							<?php if ( $provider['obj']->is_available_for_user( $user ) ) : ?>
-							<span class="two-factor-option <?php esc_html_e( 'deactivate' ); ?>">
-							<a href="#" id="two_factor-deactivate-<?php _e( esc_attr( $provider['key'] ) ); ?>" aria-label="Deactivate <?php $provider['obj']->print_label(); ?>">Deactivate</a>
+
+							<span class="two-factor-option two-factor-update">
+								<?php if ( in_array( $provider['key'], $user_providers ) ) :
+									$update_link = wp_nonce_url( admin_url('profile.php'), 'two_factor_options_update_deactivate', 'two_factor_nonce' );
+									$update_link = add_query_arg( 'action', 'deactivate', $update_link );
+									$update_link = add_query_arg( 'provider', $provider[ 'key' ], $update_link );
+									?>
+									<a href="<?php echo esc_url( $update_link ); ?>" id="two_factor_update-<?php _e( esc_attr( $provider['key'] ) ); ?>" aria-label="Deactivate <?php $provider['obj']->print_label(); ?>">Deactivate</a>
+								<?php else :
+									$update_link = wp_nonce_url( admin_url('profile.php'), 'two_factor_options_update_activate', 'two_factor_nonce' );
+									$update_link = add_query_arg( 'action', 'activate', $update_link );
+									$update_link = add_query_arg( 'provider', $provider[ 'key' ], $update_link );
+									?>
+									<a href="<?php echo esc_url( $update_link ); ?>" id="two_factor_update-<?php _e( esc_attr( $provider['key'] ) ); ?>" aria-label="Activate <?php $provider['obj']->print_label(); ?>">Activate</a>
+								<?php endif; ?>
 							</span>
+
+							<?php if ( $provider['obj']->is_available_for_user( $user ) ) :
+								_e( ' | ' );
+								$update_link = wp_nonce_url( admin_url('profile.php'), 'two_factor_options_update_deactivate', 'two_factor_nonce' );
+								$update_link = add_query_arg( 'action', 'deactivate', $update_link );
+								$update_link = add_query_arg( 'provider', $provider[ 'key' ], $update_link );
+								?>
+								<span class="two-factor-option <?php esc_html_e( 'delete' ); ?>">
+								<a href="#" id="two_factor-manage-<?php _e( esc_attr( $provider['key'] ) ); ?>" aria-label="Manage <?php $provider['obj']->print_label(); ?>">Manage</a>
+								</span>
 							<?php else : ?>
-							<span class="two-factor-option <?php esc_html_e( 'activate' ); ?>">
-							<a href="#" id="two_factor-activate-<?php _e( esc_attr( $provider['key'] ) ); ?>" aria-label="Activate <?php $provider['obj']->print_label(); ?>">Activate</a>
-							</span>
+								<?php if ( in_array( $provider['key'], $user_providers ) ) :
+									_e( ' | ' );
+									?>
+									<span class="two-factor-option <?php esc_html_e( 'setup' ); ?>">
+									<a href="#" id="two_factor-setup-<?php _e( esc_attr( $provider['key'] ) ); ?>" aria-label="Setup <?php $provider['obj']->print_label(); ?>">Setup</a>
+									</span>
+								<?php endif; ?>
 							<?php endif; ?>
-							<?php _e( ' | ' ); ?>
-							<?php if ( $provider['obj']->is_available_for_user( $user ) ) : ?>
-							<span class="two-factor-option <?php esc_html_e( 'delete' ); ?>">
-							<a href="#" id="two_factor-delete-<?php _e( esc_attr( $provider['key'] ) ); ?>" aria-label="Remove Data <?php $provider['obj']->print_label(); ?>">Remove Data</a>
-							</span>
-							<?php else : ?>
-							<span class="two-factor-option <?php esc_html_e( 'setup' ); ?>">
-							<a href="#" id="two_factor-setup-<?php _e( esc_attr( $provider['key'] ) ); ?>" aria-label="Setup <?php $provider['obj']->print_label(); ?>">Setup</a>
-							</span>
-							<?php endif; ?>
+
 						</div>
 					</td>
 					<td class="column-details desc">
 						<div class="plugin-description two-factor-column-details">
-						<?php $provider['obj']->print_description(); ?>
+							<?php $provider['obj']->print_description(); ?>
 						</div>
 						<div class="two-factor-options">
 							<div class="two-factor-option-details">
-							<?php do_action( 'two_factor_user_option_details-' . $provider['name'], $user ); ?>
+								<?php do_action( 'two_factor_user_option_details-' . $provider['name'], $user ); ?>
 							</div>
 							<div class="two-factor-options two-factor-toggle hide-if-js">
-							<?php do_action( 'two_factor_user_options-' . $provider['name'], $user ); ?>
+								<?php do_action( 'two_factor_user_option-' . $provider['name'], $user ); ?>
 							</div>
-						</div>
 						</div>
 					</td>
 				</tr>
@@ -750,7 +743,8 @@ class Two_Factor {
 			</tbody>
 		</table>
 		</div>
-		</td></tr>
+		</td>
+		</tr>
 		</table>
 		<?php
 
@@ -764,6 +758,37 @@ class Two_Factor {
 		do_action( 'show_user_security_settings', $user );
 	}
 
+	// public static function get_var_dump_recursive( $var ) {
+	// 	$ret = '';
+	// 	foreach( $var as $key => $val ) {
+	// 			$ret .= '<tr>';
+	// 	        $ret .= '<td><strong>';
+	// 	        $ret .= $key;
+	// 	        $ret .= '</strong></td>';
+	// 	        $ret .= '<td>';
+	// 	        if ( is_array( $val ) ) {
+	// 	        	$ret .= self::get_var_dump( $val );
+	// 	        } else {
+	// 	        	$ret .= $val;	
+	// 	        }
+	// 	        $ret .= '</td>';
+	// 	        $ret .= '</tr>';
+	// 	}
+	// 	return $ret;
+	// }
+
+	// public static function get_var_dump( $val ) {
+	// 	$ret = '';
+	// 	$ret .= '<table border="1" width="100%" style="border:1px solid black; border-collapse: collapse;">';
+	// 	$ret .= self::get_var_dump_recursive( $val );
+	// 	$ret .= '</table>';
+	// 	return $ret;
+	// }
+
+	// public static function dump_request() {
+	// 	wp_die( self::get_var_dump( $_REQUEST ) );
+	// }
+
 	/**
 	 * Update the user meta value.
 	 *
@@ -773,26 +798,73 @@ class Two_Factor {
 	 *
 	 * @param int $user_id User ID.
 	 */
-	public static function user_two_factor_options_update( $user_id ) {
-		if ( isset( $_POST['_nonce_user_two_factor_options'] ) ) {
-			check_admin_referer( 'user_two_factor_options', '_nonce_user_two_factor_options' );
-			$providers         = self::get_providers();
+	public static function user_two_factor_options_update( $user ) {
+		if ( empty( $user ) ) {
+			$user = wp_get_current_user();
+		}
 
-			if ( ! isset( $_POST[ self::ENABLED_PROVIDERS_USER_META_KEY ] ) ||
-					! is_array( $_POST[ self::ENABLED_PROVIDERS_USER_META_KEY ] ) ) {
+		if ( is_numeric( $user ) ) {
+			$user = get_userdata( $user );
+		}
+		// make sure all parameters were give, otherwise skip any updating
+		foreach( self::add_filterable_params() as $param ) {
+			if ( ! isset( $_REQUEST[ $param ] ) ) {
+				return;
+			}
+		}
+
+		if ( check_admin_referer( 'two_factor_options_update_' . $_REQUEST[ 'action' ], 'two_factor_nonce' ) ) {
+			$available_providers = array_map( function( $p ) { return $p['key']; }, self::get_providers() );
+			if ( empty( $available_providers ) ) {
 				return;
 			}
 
-			$enabled_providers = $_POST[ self::ENABLED_PROVIDERS_USER_META_KEY ];
-			$enabled_providers = array_intersect( $enabled_providers, array_keys( $providers ) );
-			update_user_meta( $user_id, self::ENABLED_PROVIDERS_USER_META_KEY, $enabled_providers );
+			$provider = $_REQUEST[ 'provider' ];
+			if ( in_array( $provider, $available_providers ) ) {
+				// at this point, we know that the given provider's key is a valid one and
+				// the user is allowed to use it
+				$current_providers = get_user_meta( $user->ID, self::ENABLED_PROVIDERS_USER_META_KEY, true );
 
-			// Whitelist the new values to only the available classes and empty.
-			$new_provider = isset( $_POST[ self::PROVIDER_USER_META_KEY ] ) ? $_POST[ self::PROVIDER_USER_META_KEY ] : '';
-			if ( empty( $new_provider ) || array_key_exists( $new_provider, $providers ) ) {
-				update_user_meta( $user_id, self::PROVIDER_USER_META_KEY, $new_provider );
+				if ( empty( $current_providers ) ) {
+					$current_providers = array();
+					// make sure the key exists for the user - this won't overwrite anything
+					// if it already exists
+					add_user_meta( $user->ID, self::ENABLED_PROVIDERS_USER_META_KEY, $current_providers, true );
+				}
+
+				if ( in_array( $provider, $current_providers ) ) {
+					if ( $_REQUEST[ 'action' ] == 'deactivate' ) {
+						// disable the provider for the user to use
+						$current_providers = array_filter( $current_providers, function( $p ) use ( $provider ) {
+							return strcasecmp( $p, $provider );
+						} );
+					}
+				} else {
+					if ( $_REQUEST[ 'action' ] == 'activate' ) {
+						// enable the provider for the user to use
+						array_push( $current_providers, $provider );
+					}
+				}
+
+				// write the updated list of providers for the user to the database
+				update_user_meta( $user->ID, self::ENABLED_PROVIDERS_USER_META_KEY, $current_providers );
 			}
+
+			if ( $_SERVER['REQUEST_METHOD'] === 'GET' ) {
+				$return_url = remove_query_arg( wp_removable_query_args() );
+		    	$return_url = wp_validate_redirect( $return_url );
+
+		    	wp_safe_redirect( esc_url( $return_url ) );
+	    	}
 		}
+	}
+
+	public static function add_filterable_params( array $vars = null ) {
+		if ( empty( $vars ) ) {
+			$vars = array();
+		}
+		array_push( $vars, 'two_factor_nonce', 'action', 'provider' );
+		return $vars;
 	}
 
 	public static function settings_section_generate( $argv ) {

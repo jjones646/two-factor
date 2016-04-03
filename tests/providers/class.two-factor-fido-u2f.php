@@ -3,7 +3,7 @@
  * Test Two Factor FIDO U2F.
  */
 
-class Tests_Two_Factor_FIDO_U2F extends WP_UnitTestCase {
+class Tests_Two_Factor_U2F extends WP_UnitTestCase {
 
 	protected $provider;
 	protected $u2f;
@@ -21,7 +21,7 @@ class Tests_Two_Factor_FIDO_U2F extends WP_UnitTestCase {
 
 			$this->u2f = new u2flib_server\U2F( "http://demo.example.com" );
 
-			$this->provider = Two_Factor_FIDO_U2F::get_instance();
+			$this->provider = Two_Factor_U2F::get_instance();
 		} catch ( Exception $e ) {
 			$this->markTestSkipped( 'Could not create U2F provider!' );
 		}

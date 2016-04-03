@@ -27,7 +27,6 @@ class Two_Factor_Email extends Two_Factor_Provider {
 	protected function __construct() {
 		$this->priority = 60;
 
-		// add_action( 'admin_enqueue_scripts',       					array( $this, 'enqueue_assets' ) );
 		add_action( 'two_factor_user_option-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
 		add_action( 'two_factor_user_option_details-' .	__CLASS__, 	array( $this, 'print_user_option_details' ) );
 
@@ -49,27 +48,12 @@ class Two_Factor_Email extends Two_Factor_Provider {
 	}
 
 	/**
-	//  * Enqueue assets.
-	//  *
-	//  * @since 0.2-dev
-	//  *
-	//  * @param string $hook Current page.
-	//  */
-	// public static function enqueue_assets( $hook ) {
-	// 	if ( ! in_array( $hook, array( 'user-edit.php', 'profile.php' ) ) ) {
-	// 		return;
-	// 	}
-
-	// 	wp_enqueue_script( 'email-options', plugins_url( 'js/email-options.js', __FILE__ ), array( 'jquery' ), null, true );
-	// }
-
-	/**
 	 * Returns the name of the provider.
 	 *
 	 * @since 0.1-dev
 	 */
 	public function get_label() {
-		return _x( 'Email', 'Provider Label' );
+		return _x( 'Email', 'Provider Label', 'two-factor' );
 	}
 
 	/**
@@ -78,7 +62,7 @@ class Two_Factor_Email extends Two_Factor_Provider {
 	 * @since 0.2-dev
 	 */
 	public function get_description() {
-		return _x( 'Receive single-use codes at your account\'s email address.', 'Two-Factor Authentication Method Description' );
+		return _x( 'Receive single-use codes at your account\'s email address.', 'Two-Factor Authentication Method Description', 'two-factor' );
 	}
 
 	/**
@@ -109,7 +93,7 @@ class Two_Factor_Email extends Two_Factor_Provider {
 		require_once( ABSPATH .  '/wp-admin/includes/template.php' );
 
 		?>
-		<p><?php esc_html_e( 'A verification code has been sent to the email address associated with your account.' ); ?></p>
+		<p><?php _e( 'A verification code has been sent to <strong>' . sanitize_email($user->user_email) . '</strong>.' ); ?></p>
 		<p>
 			<label for="authcode"><?php esc_html_e( 'Verification Code:' ); ?></label>
 			<input type="tel" name="two_factor-email_code" id="authcode" class="input" value="" size="20" pattern="[0-9]*" />
@@ -156,7 +140,7 @@ class Two_Factor_Email extends Two_Factor_Provider {
 	public function is_available_for_user( $user ) {
 		// does this user have a valid email address field?
 		if ( is_email( $user->user_email ) ) {
-			return true;
+			return false;
 		}
 		return false;
 	}
@@ -188,7 +172,7 @@ class Two_Factor_Email extends Two_Factor_Provider {
 			return false;
 		}
 
-		$message = sprintf( __( 'Single-use codes will be sent to <strong>%1$s</strong>' ), $user->user_email );
+		$message = sprintf( __( 'Single-use codes will be sent to <strong>%1$s</strong>.' ), $user->user_email );
 
 		_e( sprintf( '<p>%1$s</p>', $message ) );
 	}
@@ -206,12 +190,7 @@ class Two_Factor_Email extends Two_Factor_Provider {
 			return;
 		}
 
-		// Return if email is explicitly disabled.
-		if ( $this->is_available_for_user( $user ) ) {
-			return;
-		}
-
-		$message = sprintf( __( 'Two-Factor: You are out of backup codes and need to <a href="%s">generate more.</a>' ), esc_url( get_edit_user_link( $user->ID ) . '#two_factor-backup_codes' ) );
+		$message = sprintf( __( 'Two-factor: You are out of backup codes and need to <a href="%s">generate more.</a>' ), esc_url( get_edit_user_link( $user->ID ) . '#two_factor-backup_codes' ) );
 
 		esc_html_e( sprintf( '<div class="%1$s"><p>%2$s</p></div>', 'notice notice-error is-dismissible', $message ) );
 	}

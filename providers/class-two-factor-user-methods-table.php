@@ -314,10 +314,11 @@ class Two_Factor_User_Methods_Table extends WP_List_Table {
     public function no_items() {
         global $plugins;
 
-        if ( !empty( $plugins['all'] ) )
-            _e( 'No plugins found.' );
-        else
-            _e( 'You do not appear to have any plugins available at this time.' );
+        if ( !empty( $plugins['all'] ) ) {
+            _ex( 'No plugins found.', 'something', 'two-factor' );
+        } else {
+            _ex( 'You do not appear to have any plugins available at this time.', 'something', 'two-factor' );
+        }
     }
 
     /**

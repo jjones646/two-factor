@@ -83,7 +83,7 @@ class Two_Factor_Toopher extends Two_Factor_Provider {
 	 * @since 0.1-dev
 	 */
 	public function get_label() {
-		return _x( 'Toopher', 'Provider Label' );
+		return _x( 'Toopher', 'phone application', 'two-factor' );
 	}
 
 	/**
@@ -92,7 +92,7 @@ class Two_Factor_Toopher extends Two_Factor_Provider {
 	 * @since 0.2-dev
 	 */
 	public function get_description() {
-		return _x( 'Use Toopher to receive push notifications to your phone.', 'Two-Factor Authentication Method Description' );
+		return _x( 'Use Toopher to receive push notifications to your phone.', 'two-factor web authentication', 'two-factor' );
 	}
 
 	/**
