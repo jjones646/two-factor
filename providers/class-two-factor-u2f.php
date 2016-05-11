@@ -189,8 +189,7 @@ class Two_Factor_U2F extends Two_Factor_Provider {
 		$requests = get_user_meta( $user->ID, self::AUTH_DATA_USER_META_KEY, true );
 
 		$response = json_decode( stripslashes( $_REQUEST['u2f_response'] ) );
-		wp_die(var_dump($response));
-
+		
 		$keys = self::get_security_keys( $user->ID );
 
 		try {
