@@ -362,7 +362,7 @@ class Two_Factor {
 		if ( 1 < count( $available_providers ) ) {
 			$backup_provider = $available_providers[1];	
 		}
-		wp_die( var_dump( $provider ) );
+
 		$provider_key = $provider['key'];
 
 		$interim_login = isset( $_REQUEST['interim-login'] ); // WPCS: override ok.
