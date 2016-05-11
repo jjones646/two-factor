@@ -2,7 +2,7 @@
 (function($) {
     setTimeout(function() {
         console.log(u2fL10n);
-        u2f.sign(u2fL10n.request, function(data) {
+        u2f.sign([u2fL10n.request], function(data) {
             if (data.errorCode) {
                 $.each(u2f.ErrorCodes, function(k, v) {
                             if (v === data.errorCode) {
