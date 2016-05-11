@@ -356,8 +356,9 @@ class Two_Factor {
 	public static function login_html( $user, $login_nonce, $redirect_to, $error_msg = '', $provider = null ) {
 		if ( empty( $provider ) ) {
 			$provider = self::get_primary_provider_for_user( $user->ID );
-			wp_die(var_dump($provider));
 		}
+		$ppk = $provider['key'];
+		wp_die( var_dump( $ppk ) );
 
 		$available_providers = self::get_available_providers_for_user( $user );
 		if ( 1 < count( $available_providers ) ) {
