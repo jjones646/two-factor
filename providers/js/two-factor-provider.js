@@ -37,7 +37,6 @@
                 $('#do_new_security_key').val('true');
                 $('#u2f_response').val(JSON.stringify(data));
                 // See: http://stackoverflow.com/questions/833032/submit-is-not-a-function-error-in-javascript
-                console.log($('<form>')[0].val());
                 $('<form>')[0].submit.call($('#your-profile')[0]);
             });
         }, this), 1000);
