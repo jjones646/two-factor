@@ -86,7 +86,7 @@ class Two_Factor_U2F extends Two_Factor_Provider {
 
 		$user = wp_get_current_user();
 		if ( self::is_available_for_user( $user ) ) {
-			$fields[ 'manage' ] = self::make_option_link( 'Remove', __CLASS__, 'manage' );
+			$fields[ 'manage' ] = self::make_option_link( 'Manage Keys', __CLASS__, 'manage' );
 		} else {
 			$fields[ 'manage' ] = self::make_option_link( 'Add Key', __CLASS__, 'setup' );
 		}

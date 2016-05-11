@@ -100,3 +100,7 @@ span.generate a {
 span.generate a:hover {
     color: rgb(95, 165, 67);
 }
+
+.two-factor-table .two-factor-options textarea {
+    font-family: "Lucida Console", Courier, monospace;
+}

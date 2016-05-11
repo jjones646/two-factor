@@ -70,7 +70,7 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 		if ( self::is_available_for_user( $user ) ) {
 			$fields[ 'manage' ] = self::make_option_link( 'Delete Codes', __CLASS__, 'delete' );
 		} else {
-			$fields[ 'manage' ] = self::make_option_link( 'Generate', __CLASS__, 'two-factor-generate' );
+			$fields[ 'manage' ] = self::make_option_link( 'Generate Codes', __CLASS__, 'two-factor-generate' );
 		}
 
 		return $fields;
@@ -224,14 +224,14 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 		$codes = array();
 		$codes_hashed = array();
 
-		// Check for arguments.
+		// Check for arguments
 		if ( isset( $args['number'] ) ) {
 			$num_codes = (int) $args['number'];
 		} else {
 			$num_codes = self::NUMBER_OF_CODES;
 		}
 
-		// Append or replace (default).
+		// Append or replace (default)
 		if ( isset( $args['method'] ) && 'append' === $args['method'] ) {
 			$codes_hashed = (array) get_user_meta( $user->ID, self::BACKUP_CODES_META_KEY, true );
 		}
@@ -245,7 +245,7 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 
 		update_user_meta( $user->ID, self::BACKUP_CODES_META_KEY, $codes_hashed );
 
-		// Unhashed.
+		// Unhashed
 		return $codes;
 	}
 
