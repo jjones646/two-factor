@@ -124,6 +124,15 @@ class Two_Factor_U2F_Admin {
 			unset( $security_key );
 		}
 
+		if ( ! empty( $security_keys ) ) {
+			require( TWO_FACTOR_DIR . 'providers/class-two-factor-u2f-user-list-table.php' );
+			$u2f_list_table = new Two_Factor_U2F_User_List_Table();
+			$u2f_list_table->items = $security_keys;
+			$u2f_list_table->prepare_items();
+			$u2f_list_table->display();
+			$u2f_list_table->inline_edit();
+		}
+
 		?>
 		<div class="register-security-key">
 			<?php if ( ! is_ssl() ) : ?>
@@ -144,15 +153,6 @@ class Two_Factor_U2F_Admin {
 			<?php endif; ?>
 		</div>
 		<?php
-
-		if ( ! empty( $security_keys ) ) {
-			require( TWO_FACTOR_DIR . 'providers/class-two-factor-u2f-user-list-table.php' );
-			$u2f_list_table = new Two_Factor_U2F_User_List_Table();
-			$u2f_list_table->items = $security_keys;
-			$u2f_list_table->prepare_items();
-			$u2f_list_table->display();
-			$u2f_list_table->inline_edit();
-		}
 	}
 
 	/**
