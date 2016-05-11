@@ -301,7 +301,7 @@ class Two_Factor_U2F extends Two_Factor_Provider {
 			'counter'     => $register->counter,
 		);
 
-		$register['name']      = __( sprintf( 'Security Key %u', $num_keys + 1) );
+		$register['name']      = __( sprintf( 'Security Key %u', $num_keys) );
 		$register['added']     = current_time( 'timestamp' );
 		$register['last_used'] = $register['added'];
 
