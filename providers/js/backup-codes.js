@@ -27,15 +27,13 @@
                 $.each(res.data.codes, function(i, val) {
                     txtarea.val(txtarea.val() + '\r\n' + (i + 1) + ')  ' + val);
                 });
-                // blank line at the end
-                txtarea.val(txtarea.val() + '\r\n');
                 // show the row now, revealing the textarea and download link
                 _this.toggleRow();
                 _this.html('Delete Codes');
                 _this.removeClass('setup').addClass('delete');
 
-                // Build the download link
-                var txt_data = 'data:application/text;charset=utf-8,' + txtarea.val();
+                // Build the download link - add a blank line at the end of the text file
+                var txt_data = 'data:application/text;charset=utf-8,' + txtarea.val() + '\r\n';
                 $('#two_factor-backup_codes-download_link').attr('href', encodeURI(txt_data));
             }
         });
