@@ -45,7 +45,7 @@
     });
 
     // Slide toggle for the 2-Step Verification enable button on user profile page
-    $('td button.two-factor.two-factor-toggle').click(function() {
+    $('td button.two-factor-toggle.two-factor-enable').click(function() {
         var elems = $(this).siblings('.two-factor.two-factor-toggle');
         $(this).toggleClass('clicked');
 
