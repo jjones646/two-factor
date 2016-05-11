@@ -498,14 +498,11 @@ class Two_Factor {
 
 		if ( isset( $_POST['provider'] ) ) {
 			$provider_key = $_POST[ 'provider' ];
-			$providers = self::get_available_providers_for_user( $user );
-			$provider = array_filter( $providers, function( $p ) use ( $provider_key ) {
+			$provider = array_filter( self::get_available_providers_for_user( $user ), function( $p ) use ( $provider_key ) {
 							return ! strcasecmp( $p['key'], $provider_key );
 						} );
-			wp_die(var_dump($provider));
 
 			if ( ! isset( $provider ) ) {
-				// wp_die( var_dump( $provider ) );
 				wp_die( esc_html__( 'Invalid two-factor provider.' ), 403 );
 			}
 
