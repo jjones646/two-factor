@@ -511,7 +511,7 @@ class Two_Factor {
 			$provider = self::get_primary_provider_for_user( $user->ID );
 			wp_die( var_dump( $provider ) );
 		}
-
+		wp_die( var_dump($provider) );
 		if ( true !== $provider['obj']->validate_authentication( $user ) ) {
 			do_action( 'wp_login_failed', $user->user_login );
 
