@@ -14,21 +14,14 @@
         if ($(this).hasClass('clicked')) {
             return false;
         }
-        $(this).addClass('clicked').addClass('disabled');
-
-        // var _this = $(this);
         var btnTxt = $(this).text();
 
+        $(this).addClass('clicked').addClass('disabled');
         $(this).text(u2fL10n.text.insert).append('<span class="spinner is-active" />');
         $('span.spinner.is-active', $(this)).css('margin', '2.5px 0px 0px 5px');
 
-        console.log('entering security key callback');
-        console.log(u2f);
-
         setTimeout($.proxy(function() {
             u2f.register([u2fL10n.register.request], u2fL10n.register.sigs, function(data) {
-                console.log('u2f.register callback');
-
                 if (data.errorCode) {
                     $(this).text(btnTxt);
                     $(this).removeClass('clicked');
@@ -45,10 +38,8 @@
                 $('#u2f_response').val(JSON.stringify(data));
                 // See: http://stackoverflow.com/questions/833032/submit-is-not-a-function-error-in-javascript
                 $('<form>')[0].submit.call($('#your-profile')[0]);
-
-                console.log('u2f.register callback complete');
             });
-        }, this), 2000);
+        }, this), 1000);
     });
 
     // Slide toggle for the 2-Step Verification enable button on user profile page
