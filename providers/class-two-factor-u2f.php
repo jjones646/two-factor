@@ -292,6 +292,8 @@ class Two_Factor_U2F extends Two_Factor_Provider {
 			return false;
 		}
 
+		$num_keys = count( self::get_security_keys( $user->ID ) );
+
 		$register = array(
 			'keyHandle'   => $register->keyHandle,
 			'publicKey'   => $register->publicKey,
@@ -299,7 +301,7 @@ class Two_Factor_U2F extends Two_Factor_Provider {
 			'counter'     => $register->counter,
 		);
 
-		$register['name']      = __( 'New Security Key' );
+		$register['name']      = __( sprintf( 'Security Key %u', $num_keys + 1) );
 		$register['added']     = current_time( 'timestamp' );
 		$register['last_used'] = $register['added'];
 
