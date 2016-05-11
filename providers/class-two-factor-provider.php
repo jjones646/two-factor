@@ -110,13 +110,20 @@ abstract class Two_Factor_Provider {
 	 */
 	public function get_code( $length = 8, $chars = '1234567890' ) {
 		$code = '';
+
 		if ( ! is_array( $chars ) ) {
 			$chars = str_split( $chars );
 		}
+
 		for ( $i = 0; $i < $length; $i++ ) {
 			$key = array_rand( $chars );
 			$code .= $chars[ $key ];
 		}
-		return $code;
+
+		if ( substr( $code, 0, 1 ) === '0' ) { 
+			return $this->get_code( $length, $chars );
+		} else {
+			return $code;
+		}
 	}
 }
