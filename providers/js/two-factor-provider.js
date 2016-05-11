@@ -16,21 +16,22 @@
         }
         $(this).addClass('clicked').addClass('disabled');
 
-        var _this = $(this);
+        // var _this = $(this);
         var btnTxt = $(this).text();
 
         $(this).text(u2fL10n.text.insert).append('<span class="spinner is-active" />');
         $('span.spinner.is-active', $(this)).css('margin', '2.5px 0px 0px 5px');
 
         console.log('entering security key callback');
+        console.log(u2f);
 
         setTimeout($.proxy(function() {
             u2f.register([u2fL10n.register.request], u2fL10n.register.sigs, function(data) {
                 console.log('u2f.register callback');
 
                 if (data.errorCode) {
-                    _this.text(btnTxt);
-                    _this.removeClass('clicked');
+                    $(this).text(btnTxt);
+                    $(this).removeClass('clicked');
 
                     $.each(u2f.ErrorCodes, function(k, v) {
                         if (v === data.errorCode) {
@@ -47,7 +48,7 @@
 
                 console.log('u2f.register callback complete');
             });
-        }, $(this)), 5000);
+        }, this), 2000);
     });
 
     // Slide toggle for the 2-Step Verification enable button on user profile page
