@@ -498,12 +498,13 @@ class Two_Factor {
 
 		if ( isset( $_POST['provider'] ) ) {
 			$provider_key = $_POST[ 'provider' ];
+			wp_die( var_dump(self::get_available_providers_for_user( $user )) );
 			$provider = array_filter( self::get_available_providers_for_user( $user ), function( $p ) use ( $provider_key ) {
 							return strcasecmp( $p['key'], $provider_key );
 						} );
 
 			if ( ! isset( $provider ) ) {
-				wp_die( var_dump( $provider ) );
+				// wp_die( var_dump( $provider ) );
 				wp_die( esc_html__( 'Invalid two-factor provider.' ), 403 );
 			}
 
@@ -511,7 +512,7 @@ class Two_Factor {
 			$provider = self::get_primary_provider_for_user( $user->ID );
 			wp_die( var_dump( $provider ) );
 		}
-		wp_die( var_dump($provider) );
+
 		if ( true !== $provider['obj']->validate_authentication( $user ) ) {
 			do_action( 'wp_login_failed', $user->user_login );
 
