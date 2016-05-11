@@ -170,7 +170,7 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 		if ( ! isset( $user->ID ) ) {
 			return false;
 		}
-		font-family: "Lucida Console", Courier, monospace;
+
 		?>
 		<p class="description"><?php _e( 'Store these codes in a secure location. You will <strong>not</strong> be able to view these codes again.' ); ?></p>
 		<textarea rows="15" cols="55" disabled></textarea>
