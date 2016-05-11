@@ -292,7 +292,7 @@ class Two_Factor_U2F extends Two_Factor_Provider {
 			return false;
 		}
 
-		$num_keys = count( self::get_security_keys( $user->ID ) );
+		$num_keys = count( self::get_security_keys( $user_id ) );
 
 		$register = array(
 			'keyHandle'   => $register->keyHandle,
