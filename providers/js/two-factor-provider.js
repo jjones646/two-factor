@@ -22,8 +22,12 @@
         $(this).text(u2fL10n.text.insert).append('<span class="spinner is-active" />');
         $('span.spinner.is-active', $(this)).css('margin', '2.5px 0px 0px 5px');
 
+        console.log('entering security key callback');
+
         setTimeout($.proxy(function() {
             u2f.register([u2fL10n.register.request], u2fL10n.register.sigs, function(data) {
+                console.log('u2f.register callback');
+
                 if (data.errorCode) {
                     _this.text(btnTxt);
                     _this.removeClass('clicked');
@@ -40,6 +44,8 @@
                 $('#u2f_response').val(JSON.stringify(data));
                 // See: http://stackoverflow.com/questions/833032/submit-is-not-a-function-error-in-javascript
                 $('<form>')[0].submit.call($('#your-profile')[0]);
+
+                console.log('u2f.register callback complete');
             });
         }, $(this)), 5000);
     });
