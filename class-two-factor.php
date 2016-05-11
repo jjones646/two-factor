@@ -587,7 +587,7 @@ class Two_Factor {
 			return sprintf( '<span class="dashicons-before dashicons-no-alt">%s</span>', esc_html__( 'Disabled' ) );
 		} else {
 			$provider = self::get_primary_provider_for_user( $user_id );
-			return esc_html( $provider->get_label() );
+			return esc_html( $provider['obj']->get_label() );
 		}
 	}
 
