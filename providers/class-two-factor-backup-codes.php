@@ -173,7 +173,7 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 
 		?>
 		<p class="description"><?php _e( 'Store these codes in a secure location. You will <strong>not</strong> be able to view these codes again.' ); ?></p>
-		<textarea rows="15" cols="65" disabled></textarea>
+		<textarea rows="15" cols="80" disabled></textarea>
 		<p><a href="#" id="two_factor-backup_codes-download_link" class="hide-if-no-js" download="two-factor-backup-codes.txt"><?php esc_html_e( 'Download' ); ?></a><p>
 		<?php
 	}
