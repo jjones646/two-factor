@@ -1,7 +1,3 @@
-.two-factor-wrap {
-
-}
-
 .two-factor {
     width: 97%;
 }
@@ -43,36 +39,29 @@ div.two-factor-details > p {
     -webkit-flex-flow: row wrap;
     flex-flow: row wrap;
 }
-
 .two-factor-flex-wrap > * {
     flex: 1 100%;
 }
-
 .two-factor-flex-miniwrap {
     display: flex;
     justify-content: space-between;
     padding: 0.6em 0em;
 }
-
 .two-factor-flex-miniwrap > div {
     margin:1em;
 }
-
 .two-factor-flex-imgwrap {
     display: flex;
     justify-content: space-around;
     align-items: center;
     padding: 1.3em;
 }
-
 .two-factor-flex-imgwrap > div {
     margin:1em;
 }
-
 .two-factor-flex-miniwrap input {
     width: 75%;
 }
-
 p + div.two-factor-flex-miniwrap {
     padding: 1.5em 0em;
 }
@@ -88,15 +77,12 @@ p + div.two-factor-flex-miniwrap {
 span.setup a {
     color: rgb(71, 127, 50);
 }
-
 span.setup a:hover {
     color: rgb(95, 165, 67);
 }
-
 span.generate a {
     color: rgb(71, 127, 50);
 }
-
 span.generate a:hover {
     color: rgb(95, 165, 67);
 }
