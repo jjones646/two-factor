@@ -126,7 +126,8 @@ class Two_Factor_U2F extends Two_Factor_Provider {
 		wp_enqueue_script( 'u2f-api', plugins_url( 'includes/u2f/u2f-api.js', __FILE__ ), null, null, true );
 
 		// register the script
-		wp_register_script( 'two_factor-u2f_login-js', plugins_url( 'js/u2f-login.js', __FILE__ ), array( 'jquery', 'u2f-api' ), null, true );
+		// wp_register_script( 'two_factor-u2f_login-js', plugins_url( 'js/u2f-login.js', __FILE__ ), array( 'jquery', 'u2f-api' ), null, true );
+		wp_enqueue_script( 'two_factor-u2f_login-js', plugins_url( 'js/u2f-login.js', __FILE__ ), array( 'jquery', 'u2f-api' ), null, true );
 	}
 
 	/**
@@ -172,8 +173,8 @@ class Two_Factor_U2F extends Two_Factor_Provider {
 			return null;
 		}
 		?>
-		<p><?php esc_html_e( 'Insert and/or tap your Security Key.' ); ?></p>
 		<input type="hidden" name="u2f_response" id="u2f_response">
+		<p><?php esc_html_e( 'Insert and/or tap your Security Key.' ); ?></p>
 		<?php
 	}
 
