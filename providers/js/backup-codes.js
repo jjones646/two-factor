@@ -8,7 +8,7 @@
 
         $.ajax({
             method: 'POST',
-            dataType: 'JSON',
+            dataType: 'json',
             url: bckCodesData.ajaxUrl,
             data: {
                 _ajax_nonce: bckCodesData.nonce,
@@ -27,6 +27,8 @@
                 $.each(res.data.codes, function(i, val) {
                     txtarea.val(txtarea.val() + '\r\n' + (i + 1) + ')  ' + val);
                 });
+                // blank line at the end
+                txtarea.val(txtarea.val() + '\r\n');
                 // show the row now, revealing the textarea and download link
                 _this.toggleRow();
                 _this.html('Delete Codes');
