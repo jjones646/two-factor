@@ -1,4 +1,4 @@
-/* global  u2fL10n */
+/* global u2fL10n, u2f */
 (function($) {
     $.fn.extend({
         // Slide toggle for the interactions for each row in the table on user profile page
@@ -29,8 +29,8 @@
                     _this.removeClass('clicked');
 
                     $.each(u2f.ErrorCodes, function(k, v) {
-                        if (v == data.errorCode) {
-                            alert('Registration failed: ' + k + '.');
+                        if (v === data.errorCode) {
+                            window.alert('Registration failed: ' + k + '.');
                             return false;
                         }
                     });
@@ -68,7 +68,7 @@
         elem.filter('.hide-if-js').slideToggle();
     });
 
-    $('button.two-factor.two-factor-submit').click(function() {
+    $('button.two-factor.two-factor-submit').click(function(e) {
         // stop the default action
         e.preventDefault();
     });
