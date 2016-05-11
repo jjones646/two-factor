@@ -644,10 +644,8 @@ class Two_Factor {
 			$configured_providers = array();
 
 			?>
-			<div class="two-factor-btn">
-				<input class="hidden" value=" "><!-- #24364 workaround -->
-				<button type="button" class="button button-secondary two-factor two-factor-toggle hide-if-no-js"><?php _e( 'Enable 2-Step Verification' ); ?></button>
-			</div>
+			<input class="hidden" value=" "><!-- #24364 workaround -->
+			<button type="button" class="button button-secondary two-factor-toggle hide-if-no-js"><?php _e( 'Enable 2-Step Verification' ); ?></button>
 			<p class="description two-factor two-factor-toggle"><?php _e('Add a second layer of protection with 2-Step Verification, which requires a single-use code when you sign in.'); ?></p>
 			<div class="two-factor two-factor-toggle hide-if-js">
 			<?php
