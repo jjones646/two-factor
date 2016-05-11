@@ -6,6 +6,10 @@
     .two-factor {
         width: 100%;
     }
+    .two-factor .two-factor-table tr th.check-column {
+        display: table-cell;
+        width: 5px;
+    }
 }
 
 .two-factor-provider-label {
