@@ -143,9 +143,9 @@ class Two_Factor_U2F_Admin {
 				<?php if ( Two_Factor_U2F::is_browser_support() ) : ?>
 					<input type="hidden" name="do_new_security_key" id="do_new_security_key">
 					<input type="hidden" name="u2f_response" id="u2f_response">
-					<?php if ( empty( $security_keys ) ) : ?>
+					
 						<button type="button" class="button button-secondary two-factor-u2f two-factor-register"><?php esc_html_e( 'Add Key' ); ?></button>
-					<?php endif; ?>
+					
 				<?php else : ?>
 					<p class="description"><?php esc_html_e( 'You are using an unsupported browser. Security Keys are only supported in Chrome 41+. ' ); ?><a href="https://support.google.com/accounts/answer/6103523"><?php esc_html_e( 'More Information' ); ?></a></p>
 					<p><button type="button" class="button button-secondary two-factor-u2f two-factor-toggle"><?php esc_html_e( 'View Keys' ); ?></button></p>
