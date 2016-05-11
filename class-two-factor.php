@@ -504,7 +504,7 @@ class Two_Factor {
 
 			if ( isset( $provider ) ) {
 				$provider = $provider[0];
-			else {
+			} else {
 				wp_die( esc_html__( 'Invalid two-factor provider.' ), 403 );
 			}
 
