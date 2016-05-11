@@ -499,7 +499,8 @@ class Two_Factor {
 		if ( isset( $_POST['provider'] ) ) {
 			$provider_key = $_POST[ 'provider' ];
 			$pp = self::get_available_providers_for_user( $user );
-			wp_die( var_dump( $pp[0] ) );
+			$pp = $pp[0];
+			wp_die( var_dump( $pp['key'] ) );
 			$provider = array_filter( self::get_available_providers_for_user( $user ), function( $p ) use ( $provider_key ) {
 							return strcasecmp( $p['key'], $provider_key );
 						} );
