@@ -502,7 +502,9 @@ class Two_Factor {
 							return ! strcasecmp( $p['key'], $provider_key );
 						} );
 
-			if ( ! isset( $provider ) ) {
+			if ( isset( $provider ) ) {
+				$provider = $provider[0];
+			else {
 				wp_die( esc_html__( 'Invalid two-factor provider.' ), 403 );
 			}
 
