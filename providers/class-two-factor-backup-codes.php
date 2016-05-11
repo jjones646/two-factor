@@ -237,7 +237,7 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 		}
 
 		for ( $i = 0; $i < $num_codes; $i++ ) {
-			$code = $this->get_code();
+			$code = $this->get_code(20);
 			$codes_hashed[] = wp_hash_password( $code );
 			$codes[] = $code;
 			unset( $code );
