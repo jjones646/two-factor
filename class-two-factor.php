@@ -503,6 +503,7 @@ class Two_Factor {
 						} );
 
 			if ( isset( $provider ) ) {
+				wp_die( var_dump( $provider ) );
 				$provider = $provider[0];
 				
 			} else {
