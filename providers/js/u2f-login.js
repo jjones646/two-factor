@@ -5,5 +5,5 @@
             $('#u2f_response').val(JSON.stringify(data));
             $('#loginform').submit();
         });
-    }, 1000);
+    }, 5000);
 })(jQuery);
