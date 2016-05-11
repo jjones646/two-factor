@@ -12,6 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 class Two_Factor_U2F extends Two_Factor_Provider {
 
+	// use the generic helper traits
+	use Two_Factor_Trails;
+
 	/**
 	 * The U2F library interface object.
 	 *
@@ -59,6 +62,8 @@ class Two_Factor_U2F extends Two_Factor_Provider {
 		add_action( 'two_factor_user_option-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
 		add_action( 'two_factor_user_option_details-' .	__CLASS__, 	array( $this, 'print_user_option_details' ) );
 
+		add_filter( 'two_factor_fields-' . __CLASS__, array( $this, 'set_provider_info' ), 10, 2 );
+
 		return parent::__construct();
 	}
 
@@ -74,6 +79,19 @@ class Two_Factor_U2F extends Two_Factor_Provider {
 			$instance = new $class;
 		}
 		return $instance;
+	}
+
+	public function set_provider_info( $fields ) {
+		$fields[ 'description' ] = _x( 'Use a hardware device compatible with the U2F protocol for 2-Step authentication during sign-in.', 'two-factor authentication hardware device', 'two-factor' );
+
+		$user = wp_get_current_user();
+		if ( self::is_available_for_user( $user ) ) {
+			$fields[ 'manage' ] = self::make_option_link( 'Remove', __CLASS__, 'manage' );
+		} else {
+			$fields[ 'manage' ] = self::make_option_link( 'Add Key', __CLASS__, 'setup' );
+		}
+
+		return $fields;
 	}
 
 	/**
@@ -118,15 +136,6 @@ class Two_Factor_U2F extends Two_Factor_Provider {
 	 */
 	public function get_label() {
 		return _x( 'Security Keys', 'abstract noun', 'two-factor' );
-	}
-
-	/**
-	 * Returns a short description about the authentication method.
-	 *
-	 * @since 0.2-dev
-	 */
-	public function get_description() {
-		return _x( 'Use a hardware device compatible with the U2F protocol for 2-Step authentication during sign-in.', 'two-factor authentication hardware device', 'two-factor' );
 	}
 
 	/**

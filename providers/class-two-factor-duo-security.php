@@ -14,6 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 class Two_Factor_Duo_Security extends Two_Factor_Provider {
 
+    // use the generic helper traits
+    use Two_Factor_Trails;
+
 	/**
 	 * The user meta token key.
 	 *

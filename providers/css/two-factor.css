@@ -3,7 +3,7 @@
 }
 
 .two-factor {
-    width: 75%;
+    width: 97%;
 }
 
 @media screen and (max-width: 782px) {
@@ -45,7 +45,6 @@ div.two-factor-details > p {
 }
 
 .two-factor-flex-wrap > * {
-    /*padding: 10px;*/
     flex: 1 100%;
 }
 
@@ -91,5 +90,13 @@ span.setup a {
 }
 
 span.setup a:hover {
+    color: rgb(95, 165, 67);
+}
+
+span.generate a {
+    color: rgb(71, 127, 50);
+}
+
+span.generate a:hover {
     color: rgb(95, 165, 67);
 }

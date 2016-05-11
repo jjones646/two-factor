@@ -1,5 +1,15 @@
 /* global  u2fL10n */
 (function($) {
+    $.fn.extend({
+        // Slide toggle for the interactions for each row in the table on user profile page
+        toggleRow: function() {
+            // select the appropiate section to slide in/out of view
+            var elem = $(this).closest('td').siblings('td');
+            elem.find('div.two-factor-options.two-factor-toggle').slideToggle();
+            return this;
+        }
+    });
+
     $('button.two-factor-register.two-factor-u2f').click(function() {
         if ($(this).hasClass('clicked')) {
             return false;
@@ -44,14 +54,10 @@
         });
     });
 
-    // Slide toggle for the interactions for each row in the table on user profile page
-    $('.two-factor-table .two-factor-option a[href="#"]').click(function(e) {
+    $('.two-factor-table .two-factor-option:not(.generate) a[href="#"]').click(function(e) {
         // stop the default action on the href link
         e.preventDefault();
-        // select the appropiate section to slide in/out of view
-        var elem = $(this).closest('td').siblings('td');
-        elem = elem.find('div.two-factor-options.two-factor-toggle');
-        elem.slideToggle();
+        $(this).toggleRow();
     });
 
     $('#two_factor-totp_show_authcode').click(function(e) {
@@ -62,9 +68,8 @@
         elem.filter('.hide-if-js').slideToggle();
     });
 
-    $('button.two-factor.two-factor-submit').click(function(){
+    $('button.two-factor.two-factor-submit').click(function() {
         // stop the default action
         e.preventDefault();
     });
-
 })(jQuery);

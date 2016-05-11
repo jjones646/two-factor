@@ -12,6 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 class Two_Factor_Email extends Two_Factor_Provider {
 
+	// use the generic helper traits
+	use Two_Factor_Trails;
+
 	/**
 	 * The user meta token key.
 	 *
@@ -30,6 +33,8 @@ class Two_Factor_Email extends Two_Factor_Provider {
 		add_action( 'two_factor_user_option-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
 		add_action( 'two_factor_user_option_details-' .	__CLASS__, 	array( $this, 'print_user_option_details' ) );
 
+		add_filter( 'two_factor_fields-' . __CLASS__, array( $this, 'set_provider_info' ), 10, 2 );
+
 		return parent::__construct();
 	}
 
@@ -47,6 +52,12 @@ class Two_Factor_Email extends Two_Factor_Provider {
 		return $instance;
 	}
 
+	public function set_provider_info( $fields ) {
+		$fields[ 'description' ] = _x( 'Receive single-use codes at your account\'s email address.', 'two-factor authentication method', 'two-factor' );
+		$fields[ 'manage' ] = '';
+		return $fields;
+	}
+
 	/**
 	 * Returns the name of the provider.
 	 *
@@ -54,15 +65,6 @@ class Two_Factor_Email extends Two_Factor_Provider {
 	 */
 	public function get_label() {
 		return _x( 'Email', 'Provider Label', 'two-factor' );
-	}
-
-	/**
-	 * Returns a short description about the authentication method.
-	 *
-	 * @since 0.2-dev
-	 */
-	public function get_description() {
-		return _x( 'Receive single-use codes at your account\'s email address.', 'Two-Factor Authentication Method Description', 'two-factor' );
 	}
 
 	/**

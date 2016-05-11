@@ -14,6 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 class Two_Factor_Totp extends Two_Factor_Provider {
 
+	// use the generic helper traits
+	use Two_Factor_Trails;
+
 	/**
 	 * The user meta token key.
 	 *
@@ -48,6 +51,8 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 		add_action( 'two_factor_user_option-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
 		add_action( 'two_factor_user_option_details-' . __CLASS__, 	array( $this, 'print_user_option_details' ) );
 
+		add_filter( 'two_factor_fields-' . __CLASS__, array( $this, 'set_provider_info' ), 10, 2 );
+
 		return parent::__construct();
 	}
 
@@ -62,6 +67,19 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 		return $instance;
 	}
 
+	public function set_provider_info( $fields ) {
+		$fields[ 'description' ] = _x( 'Use an Authentication App on your phone that will generate time-synchronized codes for your account.', 'two-factor web authentication', 'two-factor' );
+
+		$user = wp_get_current_user();
+		if ( self::is_available_for_user( $user ) ) {
+			$fields[ 'manage' ] = self::make_option_link( 'Remove', __CLASS__, 'delete' );
+		} else {
+			$fields[ 'manage' ] = self::make_option_link( 'Setup App', __CLASS__, 'setup' );
+		}
+
+		return $fields;
+	}
+
 	/**
 	 * Returns the name of the provider.
 	 * 
@@ -69,15 +87,6 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	 */
 	public function get_label() {
 		return _x( 'Authenticator App', 'time-based one-time password phone application', 'two-factor' );
-	}
-
-	/**
-	 * Returns a short description about the authentication method.
-	 *
-	 * @since 0.2-dev
-	 */
-	public function get_description() {
-		return _x( 'Use an Authentication App on your phone that will generate time-synchronized codes for your account.', 'Two-factor web authentication', 'two-factor' );
 	}
 
 	/**

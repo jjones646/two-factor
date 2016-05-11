@@ -3,7 +3,8 @@
 // If this file is called directly, abort.
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-// add_action( 'all', create_function( '', 'var_dump( current_filter() );' ) );
+// load the trait methods so we can use them in the class
+require_once( TWO_FACTOR_DIR . 'traits-two-factor.php' );
 
 /**
  * Class for creating two factor authorization.
@@ -13,6 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * @package Two_Factor
  */
 class Two_Factor {
+
+	// use the generic helper traits
+	use Two_Factor_Trails;
 
 	/**
 	 * The global key holding all available providers.
@@ -131,17 +135,11 @@ class Two_Factor {
 
 					// get an instance of the provider class
 					$inst = call_user_func( array( $class, 'get_instance' ) );
-					$key = sanitize_key( $class );
-
+					
+					$data_obj[ 'key' ] = self::make_provider_key( $class );
 					$data_obj[ 'name' ] = $class;
 					$data_obj[ 'obj' ] = $inst;
 
-					$pos = strpos($key, 'two_factor_');
-					if ( $pos === 0 ) {
-					    $key = substr_replace( $key, '', $pos, strlen( 'two_factor_' ) );
-					}
-					$data_obj[ 'key' ] = $key;
-					
 					// now add the new data structure to our array
 					array_push( $providers_array, $data_obj );
 				} catch ( Exception $e ) {}
@@ -658,11 +656,6 @@ class Two_Factor {
 		$primary_provider = self::get_primary_provider_for_user( $user->ID );
 		wp_nonce_field( 'two_factor_options_update', 'two_factor_nonce' );
 
-		// if ( $two_factor_disabled ) {
-		// 	// dummy input so post request key will still be submitted with the form
-		// 	_e( '<input type="hidden" name="' . __( esc_attr( self::ENABLED_PROVIDERS_USER_META_KEY ) ) . '[]" value="35gin234t"/>' );
-		// }
-
 		?>
 		<table class="wp-list-table widefat two-factor-table plugins">
 			<thead>
@@ -675,59 +668,42 @@ class Two_Factor {
 				</tr>
 			</thead>
 			<tbody id="the-list">
-			<?php foreach ( self::get_providers() as $provider ) : ?>
-				<?php if ( in_array( $provider['key'], $user_providers ) ) : ?>
-				<tr class="active">
-				<?php else : ?>
-				<tr class="inactive">
-				<?php endif; ?>
+			<?php foreach ( self::get_providers() as $provider ) :
+				$fields = array(
+					'description' => '',
+		            'manage' => self::make_option_link( 'Manage', $provider[ 'key' ], 'two-factor-manage' )
+	        	);
+				$is_active = in_array( $provider['key'], $user_providers );
+				$provider_fields = apply_filters( 'two_factor_fields-' . $provider['name'], $fields );
+				?>
+				<tr class="<?php _e( $is_active ? 'active' : 'inactive' ); ?>">
 					<th scope="row" class="check-column">
 						<label class="screen-reader-text">Select <?php $provider['obj']->print_label(); ?></label>
 						<input type="hidden" name="checked[]" value="<?php $provider['obj']->is_available_for_user( $user ); ?>">
 					</th>
 					<td class="plugin-title column-primary"><strong><?php $provider['obj']->print_label(); ?></strong>
 						<div class="row-actions visible">
+						<?php
 
-							<span class="two-factor-option two-factor-update">
-								<?php if ( in_array( $provider['key'], $user_providers ) ) :
-									$update_link = wp_nonce_url( admin_url('profile.php'), 'two_factor_options_update_deactivate', 'two_factor_nonce' );
-									$update_link = add_query_arg( 'action', 'deactivate', $update_link );
-									$update_link = add_query_arg( 'provider', $provider[ 'key' ], $update_link );
-									?>
-									<a href="<?php echo esc_url( $update_link ); ?>" id="two_factor_update-<?php _e( esc_attr( $provider['key'] ) ); ?>" aria-label="Deactivate <?php $provider['obj']->print_label(); ?>">Deactivate</a>
-								<?php else :
-									$update_link = wp_nonce_url( admin_url('profile.php'), 'two_factor_options_update_activate', 'two_factor_nonce' );
-									$update_link = add_query_arg( 'action', 'activate', $update_link );
-									$update_link = add_query_arg( 'provider', $provider[ 'key' ], $update_link );
-									?>
-									<a href="<?php echo esc_url( $update_link ); ?>" id="two_factor_update-<?php _e( esc_attr( $provider['key'] ) ); ?>" aria-label="Activate <?php $provider['obj']->print_label(); ?>">Activate</a>
-								<?php endif; ?>
-							</span>
+						$action_name = esc_html( $is_active ? 'Deactivate' : 'Activate' );
+						$action_name_strict = self::make_provider_key( $action_name );
 
-							<?php if ( $provider['obj']->is_available_for_user( $user ) ) :
-								_e( ' | ' );
-								$update_link = wp_nonce_url( admin_url('profile.php'), 'two_factor_options_update_deactivate', 'two_factor_nonce' );
-								$update_link = add_query_arg( 'action', 'deactivate', $update_link );
-								$update_link = add_query_arg( 'provider', $provider[ 'key' ], $update_link );
-								?>
-								<span class="two-factor-option <?php esc_html_e( 'delete' ); ?>">
-								<a href="#" id="two_factor-manage-<?php _e( esc_attr( $provider['key'] ) ); ?>" aria-label="Manage <?php $provider['obj']->print_label(); ?>">Manage</a>
-								</span>
-							<?php else : ?>
-								<?php if ( in_array( $provider['key'], $user_providers ) ) :
-									_e( ' | ' );
-									?>
-									<span class="two-factor-option <?php esc_html_e( 'setup' ); ?>">
-									<a href="#" id="two_factor-setup-<?php _e( esc_attr( $provider['key'] ) ); ?>" aria-label="Setup <?php $provider['obj']->print_label(); ?>">Setup</a>
-									</span>
-								<?php endif; ?>
-							<?php endif; ?>
+						$update_link = wp_nonce_url( admin_url('profile.php'), 'two_factor_options_update_' . $action_name_strict, 'two_factor_nonce' );
+						$update_link = add_query_arg( 'action', $action_name_strict, $update_link );
+						$update_link = add_query_arg( 'provider', $provider[ 'key' ], $update_link );
 
+						_e( self::make_option_link( $action_name, $provider[ 'key' ], 'two-factor-update', $update_link, false ) );
+
+						if ( ! empty( $provider_fields[ 'manage' ] ) && $is_active ) {
+							_e( $provider_fields[ 'manage' ] );
+						}
+
+						?>
 						</div>
 					</td>
 					<td class="column-details desc">
 						<div class="plugin-description two-factor-column-details">
-							<?php $provider['obj']->print_description(); ?>
+							<?php _e( $provider_fields[ 'description' ] ); ?>
 						</div>
 						<div class="two-factor-options">
 							<div class="two-factor-option-details">
@@ -757,37 +733,6 @@ class Two_Factor {
 		 */
 		do_action( 'show_user_security_settings', $user );
 	}
-
-	// public static function get_var_dump_recursive( $var ) {
-	// 	$ret = '';
-	// 	foreach( $var as $key => $val ) {
-	// 			$ret .= '<tr>';
-	// 	        $ret .= '<td><strong>';
-	// 	        $ret .= $key;
-	// 	        $ret .= '</strong></td>';
-	// 	        $ret .= '<td>';
-	// 	        if ( is_array( $val ) ) {
-	// 	        	$ret .= self::get_var_dump( $val );
-	// 	        } else {
-	// 	        	$ret .= $val;	
-	// 	        }
-	// 	        $ret .= '</td>';
-	// 	        $ret .= '</tr>';
-	// 	}
-	// 	return $ret;
-	// }
-
-	// public static function get_var_dump( $val ) {
-	// 	$ret = '';
-	// 	$ret .= '<table border="1" width="100%" style="border:1px solid black; border-collapse: collapse;">';
-	// 	$ret .= self::get_var_dump_recursive( $val );
-	// 	$ret .= '</table>';
-	// 	return $ret;
-	// }
-
-	// public static function dump_request() {
-	// 	wp_die( self::get_var_dump( $_REQUEST ) );
-	// }
 
 	/**
 	 * Update the user meta value.
@@ -892,21 +837,6 @@ class Two_Factor {
 			// register the field to the section
 			register_setting( $section_name, $id );
 		}
-	}
-
-	/**
-	 * Display option for provider enable/disable checkbox.
-	 *
-	 * @since 0.2-dev
-	 */
-	public static function show_checkbox( $argv ) {
-		$elem = sprintf( '<input type="checkbox" id="%1$s" name="%2$s" value="1" %3$s >',
-			esc_attr( $argv[ 'id' ] ),
-			esc_attr( $argv[ 'name' ] ),
-			checked( $argv[ 'is_enabled' ], true, false )
-		);
-
-		_e( $elem );
 	}
 
 	public static function get_enabled_providers( $default_val = null ) {

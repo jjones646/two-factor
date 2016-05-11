@@ -12,6 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 
+	// use the generic helper traits
+	use Two_Factor_Trails;
+
 	/**
 	 * The user meta backup codes key.
 	 *
@@ -34,12 +37,14 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	protected function __construct() {
 		$this->priority = 80;
 
-		add_action( 'wp_enqueue_scripts',       					array( $this, 'enqueue_assets' ) );
+		add_action( 'admin_enqueue_scripts',       					array( $this, 'enqueue_assets' ) );
 		add_action( 'wp_ajax_two_factor_backup_codes_generate', 	array( $this, 'ajax_generate_json' ) );
 
 		add_action( 'admin_notices', 								array( $this, 'admin_notices' ) );
 		add_action( 'two_factor_user_option-' . 		__CLASS__, 	array( $this, 'print_user_options' ) );
 		add_action( 'two_factor_user_option_details-' .	__CLASS__, 	array( $this, 'print_user_option_details' ) );
+
+		add_filter( 'two_factor_fields-' . __CLASS__, 				array( $this, 'set_provider_info' ), 10, 2 );
 
 		return parent::__construct();
 	}
@@ -58,6 +63,19 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 		return $instance;
 	}
 
+	public function set_provider_info( $fields ) {
+		$fields[ 'description' ] = _x( 'Receive single-use codes at your account\'s email address.', 'two-factor authentication method', 'two-factor' );
+
+		$user = wp_get_current_user();
+		if ( self::is_available_for_user( $user ) ) {
+			$fields[ 'manage' ] = self::make_option_link( 'Delete Codes', __CLASS__, 'delete' );
+		} else {
+			$fields[ 'manage' ] = self::make_option_link( 'Generate', __CLASS__, 'two-factor-generate' );
+		}
+
+		return $fields;
+	}
+
 	/**
 	 * Enqueue assets.
 	 *
@@ -65,25 +83,20 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	 *
 	 * @param string $hook Current page.
 	 */
-	public static function enqueue_assets( $hook ) {
+	public function enqueue_assets( $hook ) {
 		if ( ! in_array( $hook, array( 'profile.php' ) ) ) {
 			return;
 		}
-		$user_id = get_current_user_id();
-
 		// register the script
 		wp_register_script( 'two_factor-backup_codes-js', plugins_url( 'js/backup-codes.js', __FILE__ ), array( 'jquery' ), null, true );
 
-		// get the nonce value
-		$ajax_nonce = wp_create_nonce( 'two_factor-backup_codes_generate_json-' . $user_id );
 		// localize the script with our data
-		$backup_codes_data = array(
-			'userId'  		=> $user_id,
-			'action'  		=> 'two_factor-backup_codes_generate',
-			'ajaxurl' 		=> $ajax_url,
-			'_ajax_nonce'   => $ajax_nonce
+		$js_data = array(
+			'action'  		=> 'two_factor_backup_codes_generate',
+			'ajaxUrl' 		=> admin_url( 'admin-ajax.php' ),
+			'nonce'   		=> wp_create_nonce( 'two_factor_codes_generate' )
 		);
-		wp_localize_script( 'two_factor-backup_codes-js', 'bckCodesData', $backup_codes_data );
+		wp_localize_script( 'two_factor-backup_codes-js', 'bckCodesData', $js_data );
 
 		// enqueued script with localized data
 		wp_enqueue_script( 'two_factor-backup_codes-js' );
@@ -118,7 +131,7 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	 * @since 0.1-dev
 	 */
 	public function get_label() {
-		return _x( 'Backup Codes', 'Provider Label', 'two-factor' );
+		return _x( 'Backup Codes', 'provider label', 'two-factor' );
 	}
 
 	/**
@@ -159,9 +172,9 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 		}
 
 		?>
-		<ol class="two-factor-backup-codes-unused-codes"></ol>
-		<p class="description"><?php _e( 'Store these codes in a secure location - You will <strong>not</strong> be able to view these codes again.' ); ?></p>
-		<p><a href="#" id="two_factor-backup_codes_download_link" class="hide-if-no-js" download="two-factor-backup-codes.txt"><?php esc_html_e( 'Download Codes' ); ?></a><p>
+		<p class="description"><?php _e( 'Store these codes in a secure location. You will <strong>not</strong> be able to view these codes again.' ); ?></p>
+		<textarea rows="15" cols="55" disabled></textarea>
+		<p><a href="#" id="two_factor-backup_codes-download_link" class="hide-if-no-js" download="two-factor-backup-codes.txt"><?php esc_html_e( 'Download' ); ?></a><p>
 		<?php
 	}
 
@@ -172,19 +185,31 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 	 *
 	 * @param WP_User $user WP_User object of the logged-in user.
 	 */
-	public function print_user_option_details( $user ) {
+	public function get_user_option_details( $user ) {
 		if ( ! isset( $user->ID ) ) {
 			return false;
 		}
 
 		$count = self::codes_remaining_for_user( $user );
 		if ( $count ) {
+			// self::delete_all_codes( $user );
 			$message = sprintf( __( 'You have <strong>%u</strong> unused %s remaining.' ), $count, _n( 'code', 'codes', $count ) );
 		} else {
 			$message = sprintf( __( 'You have not generated any backup codes.' ) );
 		}
 
-		_e( sprintf( '<p>%1$s</p>', $message ) );
+		return sprintf( '<p>%1$s</p>', $message );
+	}
+
+	/**
+	 * Inserts markup at the end of the user profile field for this provider.
+	 *
+	 * @since 0.2-dev
+	 *
+	 * @param WP_User $user WP_User object of the logged-in user.
+	 */
+	public function print_user_option_details( $user ) {
+		_e( self::get_user_option_details( $user ) );
 	}
 
 	/**
@@ -224,25 +249,33 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 		return $codes;
 	}
 
+	public function get_comment_block( $user ) {
+		$header =  __( '# These are single-use codes for ' . get_home_url() . ".\r\n" );
+		$header .= __( '#   Date: ' . current_time( 'mysql', true ) . "\r\n" );
+		$header .= __( '#   User: ' . $user->user_login . "\r\n" );
+		return $header;
+	}
+
 	/**
 	 * Generates a JSON object of backup codes.
 	 *
 	 * @since 0.1-dev
 	 */
 	public function ajax_generate_json() {
-		$user = get_user_by( 'id', sanitize_text_field( $_POST['user_id'] ) );
-		check_ajax_referer( 'two_factor-backup_codes_generate_json-' . $user->ID, 'nonce' );
+		check_ajax_referer( 'two_factor_codes_generate', '_ajax_nonce' );
+		$user = wp_get_current_user();
 
 		// Setup the return data.
 		$codes = $this->generate_codes( $user );
-		$count = self::codes_remaining_for_user( $user );
 		$i18n = array(
-			'count' => esc_html( sprintf( _n( '%s unused code remaining.', '%s unused codes remaining.', $count ), $count ) ),
-			'title' => esc_html__( 'Two-factor Backup Codes for %s' ),
+			'title' => self::get_user_option_details( $user ),
+			'header' => self::get_comment_block( $user )
 		);
 
 		// Send the response.
 		wp_send_json_success( array( 'codes' => $codes, 'i18n' => $i18n ) );
+		// don't continue now that we're done
+		wp_die();
 	}
 
 	/**
