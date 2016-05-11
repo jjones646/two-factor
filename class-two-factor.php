@@ -363,8 +363,6 @@ class Two_Factor {
 			$backup_provider = $available_providers[1];	
 		}
 
-		$provider_key = $provider['key'];
-
 		$interim_login = isset( $_REQUEST['interim-login'] ); // WPCS: override ok.
 
 		$wp_login_url = wp_login_url();
@@ -386,7 +384,7 @@ class Two_Factor {
 
 		?>
 		<form name="validate_2fa_form" id="loginform" action="<?php echo esc_url( set_url_scheme( add_query_arg( 'action', 'validate_2fa', $wp_login_url ), 'login_post' ) ); ?>" method="post" autocomplete="off">
-				<input type="hidden" name="provider"      id="provider"      value="<?php echo esc_attr( $provider_key ); ?>" />
+				<input type="hidden" name="provider"      id="provider"      value="<?php echo esc_attr( $provider['key'] ); ?>" />
 				<input type="hidden" name="wp-auth-id"    id="wp-auth-id"    value="<?php echo esc_attr( $user->ID ); ?>" />
 				<input type="hidden" name="wp-auth-nonce" id="wp-auth-nonce" value="<?php echo esc_attr( $login_nonce ); ?>" />
 				<?php if ( $interim_login ) : ?>
