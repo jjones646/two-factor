@@ -43,18 +43,19 @@
 		},
 
 		edit: function(id) {
-			var editRow, rowData, val,
-				t = this;
-			t.revert();
+			var editRow, rowData, val;
+			$(this).revert();
 
 			if ('object' === typeof id) {
-				id = t.getId(id);
+				id = $(this).getId(id);
 			}
 
-			editRow = $('#inline-edit').clone(true), rowData = $('#inline_' + id);
+			editRow = $('#inline-edit').clone(true);
+			rowData = $('#inline_' + id);
+			console.log(editRow);
 			$('td', editRow).attr('colspan', $('th:visible, td:visible', '#security-keys-section .widefat thead').length);
 
-			$(t.what + id).hide().after(editRow).after('<tr class="hidden"></tr>');
+			$($(this).what + id).hide().after(editRow).after('<tr class="hidden"></tr>');
 
 			val = $('.name', rowData);
 			val.find('img').replaceWith(function() {
